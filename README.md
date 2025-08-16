@@ -2,7 +2,7 @@
 
 *Last updated: 2025‑08‑16*
 
-A **field‑first** web app that makes the project directory the home for supers. Minimal inputs; the work they already do (marking subs on site, noting what they’re working on) auto‑fills reporting. **No timers.** Cards reset at **12:01 AM** (project time zone). The directory is grouped by **domains**: Admin, Subcontractors, Suppliers, Engineering/Architecture, and AHJ. Admin shows **job titles**; other domains show **service/material** as the role.
+A **field‑first** web app that makes the project directory the home for supers. Minimal inputs; the work they already do (marking subs on site, noting what they’re working on) auto‑fills reporting. **No timers.** Cards reset at **00:00** (project time zone). The directory is grouped by **domains**: Admin, Subcontractors, Suppliers, Engineering/Architecture, and AHJ. Admin shows **job titles**; other domains show **service/material** as the role.
 
 ---
 
@@ -44,7 +44,7 @@ pnpm dev
 
 ### Operational Rules
 
-- Deterministic nightly reset at **12:01 AM** (project tz)
+- Deterministic nightly reset at **00:00** (project tz)
 - Offline writes queue and retry; server is source of truth; **audit all writes**
 - Presence is **one row per contact per day** (update crew/activity in place)
 
@@ -274,11 +274,11 @@ GET    /projects/:id/weather   # server caches provider response (optional)
 
 **Done when:** Status transitions to `submitted` and is immutable via UI.
 
-### 5) Offline + Midnight Reset
+### 5) Offline + Daily Reset
 
 - Dexie queue for presence/flags/report‑line writes
 - Retry on reconnect; last‑write‑wins
-- Server job resets roster at **12:01 AM** per project tz
+- Server job resets roster at **00:00** per project tz
 
 ### 6) Utilities
 
