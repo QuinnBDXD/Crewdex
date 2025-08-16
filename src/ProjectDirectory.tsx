@@ -69,7 +69,7 @@ type Theme = "light" | "dark" | "field" | "steel" | "safety";
 
 // TEST-ONLY CONTROLS (rendered above the UI, not part of product UI)
 function TestControls({ layout, setLayout, theme, setTheme }: { layout: LayoutMode; setLayout: (l: LayoutMode) => void; theme: Theme; setTheme: (t: Theme) => void }) {
-  if (process.env.NODE_ENV === "production") return null;
+  if (import.meta.env.PROD) return null;
   const themeOptions: Theme[] = ["light", "dark", "field", "steel", "safety"];
   return (
     <div className="sticky top-0 z-40 mb-3 rounded-xl border border-dashed border-gray-300 bg-gray-50 px-3 py-2 flex items-center gap-2 flex-wrap">
@@ -337,7 +337,7 @@ export default function ProjectDirectory() {
       </Modal>
 
       {/* DEV TESTS (lightweight) */}
-      {process.env.NODE_ENV !== "production" && <DevSelfTests theme={theme} />}
+      {import.meta.env.DEV && <DevSelfTests theme={theme} />}
     </div>
   );
 }
