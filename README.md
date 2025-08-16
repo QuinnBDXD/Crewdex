@@ -30,7 +30,9 @@ pnpm install
 cp .env.example .env   # fill POSTGRES_URL, WEATHER_API_KEY (optional)
 pnpm db:migrate        # run SQL in /db/migrations
 pnpm build
-pnpm dev
+pnpm dev               # starts frontend (Vite) and backend API
+# backend only:
+pnpm dev:backend
 ```
 
 ### Tech Stack

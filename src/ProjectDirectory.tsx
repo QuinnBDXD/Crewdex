@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -97,19 +97,24 @@ export default function ProjectDirectory() {
   const [theme, setTheme] = useState<Theme>("light");
   const [flagContact, setFlagContact] = useState<{ domain: Domain; id: number; name: string } | null>(null);
   const [flagStep, setFlagStep] = useState<"choose" | "onSite" | "issue">("choose");
+  const [projectInfo, setProjectInfo] = useState<{ name: string; number: string; location: string; client: string; status: string } | null>(null);
+  const [weather, setWeather] = useState<{ current: string; forecast: string[] } | null>(null);
+  const [domains, setDomains] = useState<Record<Domain, Contact[]> | null>(null);
 
-  const projectInfo = {
-    name: "Downtown Office Tower",
-    number: "Project #2025-001",
-    location: "123 Peachtree St, Atlanta, GA",
-    client: "Acme Development Group",
-    status: "Active",
-  } as const;
-
-  const weather = {
-    current: "Sunny, 84°F",
-    forecast: ["Mon: 86°", "Tue: 84°", "Wed: 80°", "Thu: 82°", "Fri: 85°", "Sat: 87°", "Sun: 83°"],
-  } as const;
+  useEffect(() => {
+    async function load() {
+      try {
+        const res = await fetch("/api/project");
+        const data = await res.json();
+        setProjectInfo(data.projectInfo);
+        setWeather(data.weather);
+        setDomains(data.domains);
+      } catch (e) {
+        console.error("Failed to load project data", e);
+      }
+    }
+    load();
+  }, []);
 
   // Theme styles
   const themeStyles = useMemo(() => {
@@ -163,41 +168,6 @@ export default function ProjectDirectory() {
     scope_tags: string[]; // required in MVP
   };
 
-  const domains: Record<Domain, Contact[]> = useMemo(
-    () => ({
-      Admin: [
-        { id: 1, name: "John Smith", company: "Main GC", role: "GC Project Manager", scope_tags: ["Contracts", "Scheduling", "Closeout"] },
-        { id: 2, name: "Emily Davis", company: "Main GC", role: "GC Contract Admin", scope_tags: ["Subcontracts", "Change Orders", "Billing"] },
-        { id: 3, name: "Robert Wilson", company: "Main GC", role: "GC Superintendent", scope_tags: ["Field Oversight", "Safety", "Inspections"] },
-        { id: 4, name: "Kevin Brooks", company: "Main GC", role: "GC Field Operations Manager", scope_tags: ["Field Ops", "Resource Planning"] },
-        { id: 5, name: "Laura Martinez", company: "Main GC", role: "GC Operations Manager", scope_tags: ["Operations", "Execution", "Client Coordination"] },
-        { id: 6, name: "David Lee", company: "Acme Development Group", role: "Client Representative", scope_tags: ["Owner Oversight", "Approvals"] },
-        { id: 7, name: "Sophia Turner", company: "Acme Development Group", role: "Client", scope_tags: ["Project Oversight"] },
-      ],
-      Subcontractors: [
-        { id: 8, name: "Maria Lopez", company: "FlowPro Plumbing", service: "Plumbing", scope_tags: ["Underground", "Rough-in", "Fixtures"] },
-        { id: 12, name: "James Carter", company: "BrightSpark Electric", service: "Electrical", scope_tags: ["Conduit", "Wiring", "Panels"] },
-        { id: 13, name: "Angela White", company: "AirFlow Heating & Cooling", service: "HVAC", scope_tags: ["Ductwork", "Units", "Controls"] },
-      ],
-      Suppliers: [
-        { id: 9, name: "Kevin Tran", company: "ReadyMix Co.", service: "Concrete Supply", scope_tags: ["Concrete delivery", "Additives", "Batch tickets"] },
-        { id: 14, name: "Olivia Green", company: "StrongSteel Inc.", service: "Steel Supply", scope_tags: ["Beams", "Columns", "Rebar"] },
-        { id: 15, name: "Daniel Scott", company: "PineTree Lumber", service: "Lumber Supply", scope_tags: ["Framing lumber", "Plywood", "Trim"] },
-      ],
-      "Engineering/Architecture": [
-        { id: 10, name: "Sarah Chen", company: "Chen & Partners", service: "Architecture", scope_tags: ["Drawings", "Details", "Revisions"] },
-        { id: 16, name: "Michael Brown", company: "BuildRight Engineers", service: "Structural Engineering", scope_tags: ["Calculations", "Beam design", "Load paths"] },
-        { id: 17, name: "Hannah Kim", company: "NextGen MEP", service: "MEP Engineering", scope_tags: ["Mechanical", "Electrical", "Plumbing"] },
-      ],
-      AHJ: [
-        { id: 11, name: "Mark Jones", company: "Building Dept.", service: "Inspections", scope_tags: ["Inspections", "Permits"] },
-        { id: 18, name: "Patricia Allen", company: "City Fire Dept.", service: "Fire Marshal", scope_tags: ["Fire protection", "Safety compliance"] },
-        { id: 19, name: "George Harris", company: "City Zoning Office", service: "Zoning", scope_tags: ["Zoning approvals", "Variances"] },
-      ],
-    }),
-    []
-  );
-
   const [openSections, setOpenSections] = useState<Record<Domain, boolean>>({
     Admin: true,
     Subcontractors: true,
@@ -225,6 +195,10 @@ export default function ProjectDirectory() {
   // Simulated device sizes for test modes (height AND width)
   const deviceSize = layout === "phone" ? "w-[360px] h-[740px]" : "w-[768px] h-[1024px]";
   const outlineBtnTheme = themeStyles.outlineBtn;
+
+  if (!projectInfo || !weather || !domains) {
+    return <div className="p-3 sm:p-6">Loading...</div>;
+  }
 
   return (
     <div className="p-3 sm:p-6 bg-gray-100 min-h-screen">
