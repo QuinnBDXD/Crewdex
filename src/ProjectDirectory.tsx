@@ -53,10 +53,10 @@ function Modal({ open, title, children, onClose }: { open: boolean; title: strin
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative w-full sm:max-w-md bg-white rounded-t-2xl sm:rounded-2xl shadow-lg p-4 m-0 sm:m-4">
+      <div className="relative w-full sm:max-w-md bg-card rounded-t-2xl sm:rounded-2xl shadow-lg p-4 m-0 sm:m-4">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-lg font-semibold">{title}</h3>
-          <button onClick={onClose} className="text-gray-500 text-sm">Close</button>
+          <button onClick={onClose} className="text-muted-foreground text-sm">Close</button>
         </div>
         {children}
       </div>
@@ -88,8 +88,8 @@ export default function ProjectDirectory() {
 
   // Static UI styles
   const ui = {
-    chip: "bg-blue-100 text-blue-800",
-    tag: "bg-gray-200 text-gray-800",
+    chip: "bg-primary/10 text-primary",
+    tag: "bg-muted text-muted-foreground",
     outlineBtn: "",
   };
 
@@ -133,20 +133,20 @@ export default function ProjectDirectory() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 text-gray-900">
-      <div className="sticky top-0 z-10 p-3 sm:p-4 bg-inherit">
+    <div className="flex flex-col h-screen overflow-hidden bg-background text-foreground">
+      <div className="sticky top-0 z-10 p-3 sm:p-4 bg-background">
         <Card className="shadow-md rounded-2xl">
           <CardContent className="p-4">
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
               <div>
                 <h1 className="text-xl sm:text-2xl font-bold mb-1">{projectInfo.number}: {projectInfo.name}</h1>
-                <p className="text-gray-700">{projectInfo.location}</p>
-                <p className="text-gray-700">Client: {projectInfo.client}</p>
+                <p className="text-muted-foreground">{projectInfo.location}</p>
+                <p className="text-muted-foreground">Client: {projectInfo.client}</p>
                 <p className="text-sm text-green-600 font-semibold">Status: {projectInfo.status}</p>
               </div>
               <div>
                 <p className="font-semibold">Current Weather</p>
-                <p className="text-gray-700">{weather.current}</p>
+                <p className="text-muted-foreground">{weather.current}</p>
                 <div className="flex flex-wrap gap-2 mt-1">
                   {weather.forecast.map((day) => (
                     <span key={day} className={`px-2 py-1 text-[11px] rounded-full ${ui.chip}`}>{day}</span>
@@ -186,7 +186,7 @@ export default function ProjectDirectory() {
                       <div className="flex flex-col gap-3">
                         <div>
                           <h3 className="text-lg font-bold">{domain === "Admin" ? c.role : c.service}</h3>
-                          <p className="text-sm text-gray-600">{c.name}{c.company ? ` · ${c.company}` : ""}</p>
+                          <p className="text-sm text-muted-foreground">{c.name}{c.company ? ` · ${c.company}` : ""}</p>
                         </div>
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
