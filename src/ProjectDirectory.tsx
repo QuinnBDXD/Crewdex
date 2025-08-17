@@ -88,7 +88,6 @@ export default function ProjectDirectory() {
 
   // Static UI styles
   const ui = {
-    frame: "bg-gray-50 text-gray-900",
     chip: "bg-blue-100 text-blue-800",
     tag: "bg-gray-200 text-gray-800",
     outlineBtn: "",
@@ -134,92 +133,86 @@ export default function ProjectDirectory() {
   }
 
   return (
-    <div className="p-3 sm:p-6 bg-gray-100 min-h-screen">
-      {/* APP FRAME */}
-      <div
-        className={`mx-auto w-full max-w-md md:max-w-3xl rounded-2xl shadow-inner ${ui.frame} flex flex-col overflow-hidden`}
-      >
-        {/* TOP PROJECT CARD — fixed region (non-scroll) */}
-        <div className="flex-shrink-0 p-3 sm:p-4">
-          <Card className="shadow-md rounded-2xl">
-            <CardContent className="p-4">
-              <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                <div>
-                  <h1 className="text-xl sm:text-2xl font-bold mb-1">{projectInfo.number}: {projectInfo.name}</h1>
-                  <p className="text-gray-700">{projectInfo.location}</p>
-                  <p className="text-gray-700">Client: {projectInfo.client}</p>
-                  <p className="text-sm text-green-600 font-semibold">Status: {projectInfo.status}</p>
-                </div>
-                <div>
-                  <p className="font-semibold">Current Weather</p>
-                  <p className="text-gray-700">{weather.current}</p>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {weather.forecast.map((day) => (
-                      <span key={day} className={`px-2 py-1 text-[11px] rounded-full ${ui.chip}`}>{day}</span>
-                    ))}
-                  </div>
-                </div>
+    <div className="min-h-screen flex flex-col bg-gray-50 text-gray-900">
+      <div className="sticky top-0 z-10 p-3 sm:p-4 bg-inherit">
+        <Card className="shadow-md rounded-2xl">
+          <CardContent className="p-4">
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold mb-1">{projectInfo.number}: {projectInfo.name}</h1>
+                <p className="text-gray-700">{projectInfo.location}</p>
+                <p className="text-gray-700">Client: {projectInfo.client}</p>
+                <p className="text-sm text-green-600 font-semibold">Status: {projectInfo.status}</p>
               </div>
-
-              {/* Square nav buttons (no layout controls here) */}
-              <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2">
-                <SquareIconButton className={ui.outlineBtn} icon={<FileText className="h-5 w-5" />} label="Plans" />
-                <SquareIconButton className={ui.outlineBtn} icon={<File className="h-5 w-5" />} label="Files" />
-                <SquareIconButton className={ui.outlineBtn} icon={<Calendar className="h-5 w-5" />} label="Schedule" />
-                <SquareIconButton className={ui.outlineBtn} icon={<BarChart2 className="h-5 w-5" />} label="Reports" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* SCROLLING DOMAIN LIST — only this area scrolls */}
-        <div className="flex-1 overflow-y-auto px-3 pb-3 sm:px-4 sm:pb-4">
-          {(Object.keys(domains) as Domain[]).map((domain) => (
-            <section key={domain} className="mb-6">
-              <button type="button" onClick={() => toggleSection(domain)} className="flex items-center w-full text-left mb-2" aria-expanded={openSections[domain]}>
-                {openSections[domain] ? <ChevronDown className="h-5 w-5 mr-2" /> : <ChevronRight className="h-5 w-5 mr-2" />}
-                <h2 className="text-xl font-semibold">{domain}</h2>
-              </button>
-
-              {openSections[domain] && (
-                <div className="grid gap-4 md:grid-cols-2">
-                  {domains[domain].map((c) => (
-                    <Card key={`${domain}-${c.id}`} className="shadow-md rounded-2xl">
-                      <CardContent className="p-4">
-                        <div className="flex flex-col gap-3">
-                          <div>
-                            <h3 className="text-lg font-bold">{domain === "Admin" ? c.role : c.service}</h3>
-                            <p className="text-sm text-gray-600">{c.name}{c.company ? ` · ${c.company}` : ""}</p>
-                          </div>
-
-                          {/* Action buttons per MVP: Call, Text, Email, Flag (single entry point) */}
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                            <SquareIconButton className={ui.outlineBtn} icon={<PhoneIcon className="h-5 w-5" />} label="Call" onClick={() => noop("call", c.name)} />
-                            <SquareIconButton className={ui.outlineBtn} icon={<MessageSquare className="h-5 w-5" />} label="Text" onClick={() => noop("text", c.name)} />
-                            <SquareIconButton className={ui.outlineBtn} icon={<Mail className="h-5 w-5" />} label="Email" onClick={() => noop("email", c.name)} />
-                            <SquareIconButton className={ui.outlineBtn} icon={<Flag className="h-5 w-5" />} label="Flag" onClick={() => openFlag(domain, c)} />
-                          </div>
-
-                          {/* Scope tags */}
-                          {c.scope_tags.length > 0 && (
-                            <div className="flex flex-wrap gap-2">
-                              {c.scope_tags.map((tag) => (
-                                <span key={tag} className={`px-3 py-1 text-sm rounded-full ${ui.tag}`}>{tag}</span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
+              <div>
+                <p className="font-semibold">Current Weather</p>
+                <p className="text-gray-700">{weather.current}</p>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {weather.forecast.map((day) => (
+                    <span key={day} className={`px-2 py-1 text-[11px] rounded-full ${ui.chip}`}>{day}</span>
                   ))}
                 </div>
-              )}
-            </section>
-          ))}
-        </div>
+              </div>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2">
+              <SquareIconButton className={ui.outlineBtn} icon={<FileText className="h-5 w-5" />} label="Plans" />
+              <SquareIconButton className={ui.outlineBtn} icon={<File className="h-5 w-5" />} label="Files" />
+              <SquareIconButton className={ui.outlineBtn} icon={<Calendar className="h-5 w-5" />} label="Schedule" />
+              <SquareIconButton className={ui.outlineBtn} icon={<BarChart2 className="h-5 w-5" />} label="Reports" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* FLAG FLOW MODAL */}
+      <div className="flex-1 overflow-y-auto px-3 pb-3 sm:px-4 sm:pb-4">
+        {(Object.keys(domains) as Domain[]).map((domain) => (
+          <section key={domain} className="mb-6">
+            <button
+              type="button"
+              onClick={() => toggleSection(domain)}
+              className="flex items-center w-full text-left mb-2"
+              aria-expanded={openSections[domain]}
+            >
+              {openSections[domain] ? <ChevronDown className="h-5 w-5 mr-2" /> : <ChevronRight className="h-5 w-5 mr-2" />}
+              <h2 className="text-xl font-semibold">{domain}</h2>
+            </button>
+
+            {openSections[domain] && (
+              <div className="grid gap-4 md:grid-cols-2">
+                {domains[domain].map((c) => (
+                  <Card key={`${domain}-${c.id}`} className="shadow-md rounded-2xl">
+                    <CardContent className="p-4">
+                      <div className="flex flex-col gap-3">
+                        <div>
+                          <h3 className="text-lg font-bold">{domain === "Admin" ? c.role : c.service}</h3>
+                          <p className="text-sm text-gray-600">{c.name}{c.company ? ` · ${c.company}` : ""}</p>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                          <SquareIconButton className={ui.outlineBtn} icon={<PhoneIcon className="h-5 w-5" />} label="Call" onClick={() => noop("call", c.name)} />
+                          <SquareIconButton className={ui.outlineBtn} icon={<MessageSquare className="h-5 w-5" />} label="Text" onClick={() => noop("text", c.name)} />
+                          <SquareIconButton className={ui.outlineBtn} icon={<Mail className="h-5 w-5" />} label="Email" onClick={() => noop("email", c.name)} />
+                          <SquareIconButton className={ui.outlineBtn} icon={<Flag className="h-5 w-5" />} label="Flag" onClick={() => openFlag(domain, c)} />
+                        </div>
+
+                        {c.scope_tags.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {c.scope_tags.map((tag) => (
+                              <span key={tag} className={`px-3 py-1 text-sm rounded-full ${ui.tag}`}>{tag}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </section>
+        ))}
+      </div>
+
       <Modal open={!!flagContact && flagStep === "choose"} title={`Flag — ${flagContact?.name || ""}`} onClose={closeFlag}>
         <div className="grid grid-cols-2 gap-2">
           <SquareIconButton icon={<Flag className="h-5 w-5" />} label="Report Issue" onClick={() => setFlagStep("issue")} />
@@ -227,7 +220,6 @@ export default function ProjectDirectory() {
         </div>
       </Modal>
 
-      {/* REPORT ISSUE (stubbed for layout) */}
       <Modal open={!!flagContact && flagStep === "issue"} title={`Report Issue — ${flagContact?.name || ""}`} onClose={closeFlag}>
         <div className="space-y-3">
           <div className="flex gap-2 flex-wrap">
@@ -243,7 +235,6 @@ export default function ProjectDirectory() {
         </div>
       </Modal>
 
-      {/* MARK ON SITE (stubbed picker) */}
       <Modal open={!!flagContact && flagStep === "onSite"} title={`Mark On Site — ${flagContact?.name || ""}`} onClose={closeFlag}>
         <div className="space-y-3">
           <div>
