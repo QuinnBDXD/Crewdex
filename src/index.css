@@ -1,7 +1,6 @@
-/* Tailwind v4 setup */
+/* Tailwind v4 CSS setup with shadcn token theme */
 @import "tailwindcss";
 
-/* Tell Tailwind where to scan */
 @source "../index.html";
 @source "./**/*.{ts,tsx,js,jsx}";
 
@@ -43,5 +42,5 @@
 
 @layer base {
   * { border-color: hsl(var(--color-border)); }
-  body { background: hsl(var(--color-background)); color: hsl(var(--color-foreground)); }
+  body { background-color: hsl(var(--color-background)); color: hsl(var(--color-foreground)); }
 }
