@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { prisma } from '../db';
 import { HttpError } from '../middleware/errorHandler';
+import { AuthenticatedRequest } from '../middleware/auth';
 
 const router = Router();
 
@@ -21,9 +22,12 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // List all accounts
-router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
+router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const accounts = await prisma.account.findMany();
+    const { user } = req as AuthenticatedRequest;
+    const accounts = await prisma.account.findMany({
+      where: { account_id: user?.account_id },
+    });
     return res.json(accounts);
   } catch (err) {
     return next(new HttpError(500, 'Failed to fetch accounts'));
