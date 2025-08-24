@@ -1,25 +1,34 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
+import { z } from 'zod';
+import { validate } from '../middleware/validate';
 
 const router = Router();
 
-router.post('/', (req: Request, res: Response) => {
-  try {
-    const required = ['name', 'client', 'location', 'creator_name', 'creator_email'];
-    const missing = required.find((f) => !req.body || !req.body[f]);
-    if (missing) {
-      return res.status(400).json({ error: `${missing} required` });
-    }
-    return res.json({});
-  } catch (err) {
-    return res.status(500).json({ error: 'Internal Server Error' });
-  }
+const createProjectSchema = z.object({
+  name: z.string(),
+  client: z.string(),
+  location: z.string(),
+  creator_name: z.string(),
+  creator_email: z.string().email(),
 });
 
-router.get('/', (_req: Request, res: Response) => {
+router.post(
+  '/',
+  validate(createProjectSchema),
+  (_req: Request, res: Response, next: NextFunction) => {
+    try {
+      return res.json({});
+    } catch (err) {
+      return next(err);
+    }
+  },
+);
+
+router.get('/', (_req: Request, res: Response, next: NextFunction) => {
   try {
     return res.json([]);
   } catch (err) {
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return next(err);
   }
 });
 
