@@ -15,10 +15,12 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
 export const authMiddleware = (allowedRoles: string[] = []) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const header = req.headers['authorization'];
-    if (!header || !header.startsWith('Bearer ')) {
+    const tokenFromHeader =
+      header && header.startsWith('Bearer ') ? header.slice(7) : undefined;
+    const token = req.cookies?.token || tokenFromHeader;
+    if (!token) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
-    const token = header.slice(7);
     try {
       const payload = jwt.verify(token, JWT_SECRET) as AuthUser;
       (req as AuthenticatedRequest).user = {

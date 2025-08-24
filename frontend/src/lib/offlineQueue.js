@@ -36,6 +36,7 @@ export async function flushQueue() {
         method: item.method,
         headers: item.headers,
         body: item.body,
+        credentials: 'include',
       });
       if (!response.ok) {
         console.error('Request failed', {
