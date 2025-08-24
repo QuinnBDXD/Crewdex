@@ -3,9 +3,9 @@
   "private": true,
   "workspaces": ["backend", "frontend"],
   "scripts": {
-    "dev": "npm run dev --workspace backend & npm run dev --workspace frontend",
+    "dev": "JWT_SECRET=dev-secret npm run dev --workspace backend & npm run dev --workspace frontend",
     "build": "npm run build --workspace backend && npm run build --workspace frontend",
-    "start": "npm run start --workspace backend",
+    "start": "JWT_SECRET=dev-secret npm run start --workspace backend",
     "db:migrate": "npm run db:migrate --workspace backend",
     "db:seed": "npm run db:seed --workspace backend"
   }
