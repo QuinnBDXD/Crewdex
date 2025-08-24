@@ -32,11 +32,19 @@ export async function flushQueue() {
   const requests = await getAllRequests();
   for (const item of requests) {
     try {
-      await fetch(item.url, {
+      const response = await fetch(item.url, {
         method: item.method,
         headers: item.headers,
         body: item.body,
       });
+      if (!response.ok) {
+        console.error('Request failed', {
+          url: item.url,
+          status: response.status,
+          statusText: response.statusText,
+        });
+        throw new Error(`Request failed with status ${response.status}`);
+      }
       const db = await openDb();
       await new Promise((resolve, reject) => {
         const tx = db.transaction(STORE_NAME, 'readwrite');
@@ -44,7 +52,8 @@ export async function flushQueue() {
         tx.onerror = () => reject(tx.error);
         tx.objectStore(STORE_NAME).delete(item.id);
       });
-    } catch {
+    } catch (err) {
+      console.error('Re-queuing request after failure', err);
       item.retryCount = (item.retryCount || 0) + 1;
       const db = await openDb();
       await new Promise((resolve, reject) => {
