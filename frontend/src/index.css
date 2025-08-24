@@ -6,4 +6,15 @@
   body {
     @apply min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-50;
   }
+  :focus-visible {
+    @apply outline-none ring-2 ring-offset-2 ring-blue-500;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }

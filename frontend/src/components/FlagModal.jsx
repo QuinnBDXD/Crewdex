@@ -6,8 +6,14 @@ export function FlagModal({ open, onOpenChange }) {
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded bg-background p-4 shadow">
-          <Dialog.Title className="mb-2 text-lg font-bold">Flag</Dialog.Title>
+        <Dialog.Content
+          className="fixed left-1/2 top-1/2 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded bg-background p-4 shadow"
+          aria-labelledby="flag-modal-title"
+          aria-modal="true"
+        >
+          <Dialog.Title id="flag-modal-title" className="mb-2 text-lg font-bold">
+            Flag
+          </Dialog.Title>
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">Flag details...</p>
           </div>
@@ -19,3 +25,4 @@ export function FlagModal({ open, onOpenChange }) {
     </Dialog.Root>
   );
 }
+
