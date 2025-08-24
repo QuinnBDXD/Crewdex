@@ -13,6 +13,7 @@ import reportTemplates from './reportTemplates';
 import reportTemplateGenerate from './reportTemplateGenerate';
 import projectSchedule from './projectSchedule';
 import projectSubscriptions from './projectSubscriptions';
+import billing from './billing';
 
 const router = Router();
 
@@ -30,5 +31,6 @@ router.use('/projects/:project_id/report-templates', reportTemplates);
 router.use('/projects/:project_id/report-templates/:template_id/generate', reportTemplateGenerate);
 router.use('/projects/:project_id/schedule', projectSchedule);
 router.use('/projects/:project_id/subscriptions', projectSubscriptions);
+router.use('/billing', billing);
 
 export default router;
