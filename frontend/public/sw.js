@@ -52,8 +52,11 @@ self.addEventListener('fetch', (event) => {
 });
 
 self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'FLUSH_QUEUE') {
+  if (event.data?.type === 'FLUSH_QUEUE') {
     event.waitUntil(flushQueue());
+  }
+  if (event.data?.type === 'GET_QUEUE_LENGTH') {
+    event.waitUntil(broadcastQueueLength());
   }
 });
 
@@ -112,19 +115,19 @@ async function deleteRequest(id) {
 
 async function flushQueue() {
   const requests = await getAllRequests();
-    for (const item of requests) {
-      try {
-        await fetch(item.url, {
-          method: item.method,
-          headers: item.headers,
-          body: item.body,
-        });
-        await deleteRequest(item.id);
-      } catch (err) {
-        console.error('Failed to replay request', err);
-        // keep request for retry
-      }
+  for (const item of requests) {
+    try {
+      await fetch(item.url, {
+        method: item.method,
+        headers: item.headers,
+        body: item.body,
+      });
+      await deleteRequest(item.id);
+    } catch (err) {
+      console.error('Failed to replay request', err);
+      // keep request for retry
     }
+  }
   await broadcastQueueLength();
 }
 
