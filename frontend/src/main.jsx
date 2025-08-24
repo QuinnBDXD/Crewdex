@@ -16,3 +16,14 @@ createRoot(document.getElementById('root')).render(
     </QueryClientProvider>
   </StrictMode>
 );
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js');
+  });
+  window.addEventListener('online', () => {
+    navigator.serviceWorker.ready.then((reg) => {
+      reg.active?.postMessage({ type: 'FLUSH_QUEUE' });
+    });
+  });
+}
