@@ -1,3 +1,9 @@
+import { precacheAndRoute } from 'workbox-precaching';
+import { registerRoute } from 'workbox-routing';
+import { StaleWhileRevalidate, CacheFirst, NetworkFirst } from 'workbox-strategies';
+import { ExpirationPlugin } from 'workbox-expiration';
+import { clientsClaim } from 'workbox-core';
+
 const DB_NAME = 'offline-queue';
 const STORE_NAME = 'requests';
 
@@ -38,13 +44,10 @@ self.addEventListener('fetch', (event) => {
           createdAt: Date.now(),
           retryCount: 0,
         });
-        return new Response(
-          JSON.stringify({ error: 'offline', queued: true }),
-          {
-            status: 503,
-            headers: { 'Content-Type': 'application/json' },
-          },
-        );
+        return new Response(JSON.stringify({ error: 'offline', queued: true }), {
+          status: 503,
+          headers: { 'Content-Type': 'application/json' },
+        });
       }),
     );
   }
@@ -55,3 +58,31 @@ self.addEventListener('message', (event) => {
     self.skipWaiting();
   }
 });
+
+precacheAndRoute(self.__WB_MANIFEST);
+clientsClaim();
+
+registerRoute(
+  ({ request }) => request.destination === 'document',
+  new StaleWhileRevalidate({ cacheName: 'html-cache' }),
+);
+
+registerRoute(
+  ({ request }) => ['script', 'style', 'worker'].includes(request.destination),
+  new StaleWhileRevalidate({ cacheName: 'asset-cache' }),
+);
+
+registerRoute(
+  ({ request }) => request.destination === 'image',
+  new CacheFirst({
+    cacheName: 'image-cache',
+    plugins: [
+      new ExpirationPlugin({ maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 * 30 }),
+    ],
+  }),
+);
+
+registerRoute(
+  /\/api\//,
+  new NetworkFirst({ cacheName: 'api-cache' }),
+);
