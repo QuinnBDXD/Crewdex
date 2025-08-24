@@ -1,0 +1,575 @@
+schema:
+  name: Crewdex App
+  version: "0.1"
+  initial_route: Login
+  conventions:
+    id_format: uuid
+    auth_model: project_contact_as_identity
+    permission_model: RBAC           # roles defined in UserRole
+
+entities:
+  - name: Account
+    idKey: account_id
+    fields:
+      - { name: account_id, type: string, required: true }
+      - { name: name, type: string, required: true }
+      - { name: created_at, type: datetime }
+
+  - name: UserRole
+    idKey: role_id
+    fields:
+      - { name: role_id, type: string, required: true }
+      - { name: name, type: enum, values: [AccountAdmin, ProjectOwner, ProjectAdmin, Viewer], required: true }
+      - { name: permissions, type: collection:string }
+
+  - name: Project
+    idKey: project_id
+    fields:
+      - { name: project_id, type: string, required: true }
+      - { name: name, type: string, required: true }
+      - { name: number, type: string }
+      - { name: client, type: string }
+      - { name: location, type: string }
+      - { name: start_date, type: date }
+      - { name: end_date, type: date }
+      - { name: creator_name, type: string }
+      - { name: creator_email, type: string }
+
+  - name: ProjectContact
+    idKey: project_contact_id
+    fields:
+      - { name: project_contact_id, type: string, required: true }
+      - { name: project_id, type: string, required: true }
+      - { name: name, type: string, required: true }
+      - { name: email, type: string, required: true }
+      - { name: phone, type: string }
+      - { name: company, type: string }
+      - { name: discipline, type: string }
+      - { name: role, type: string }
+      - { name: visibility, type: enum, values: [public, internal], default: public }
+    constraints:
+      - kind: unique
+        fields: [project_id, email]
+
+  - name: ContactGroup
+    idKey: group_id
+    fields:
+      - { name: group_id, type: string, required: true }
+      - { name: project_id, type: string, required: true }
+      - { name: name, type: string, required: true }
+      - { name: member_project_contact_ids, type: collection:string }
+
+  - name: Scope
+    idKey: scopecode
+    fields:
+      - { name: scopecode, type: string, required: true }
+      - { name: name, type: string, required: true }
+
+  - name: ProjectContactScopeLink
+    idKey: pcsl_id
+    fields:
+      - { name: pcsl_id, type: string, required: true }
+      - { name: project_id, type: string, required: true }
+      - { name: project_contact_id, type: string, required: true }
+      - { name: scopecode, type: string, required: true }
+      - { name: activity_labels, type: collection:string }
+      - { name: notes, type: string }
+    constraints:
+      - kind: unique
+        fields: [project_id, project_contact_id, scopecode]
+
+  - name: Flag
+    idKey: flag_id
+    fields:
+      - { name: flag_id, type: string, required: true }
+      - { name: project_id, type: string, required: true }
+      - { name: project_contact_id, type: string }
+      - { name: kind, type: enum, values: [On Site, Quality, Safety, Lagging], required: true }
+      - { name: date, type: enum, values: [Today, Enter Date], required: true }
+      - { name: scopecode, type: string }
+      - { name: description, type: string }
+      - { name: crew_size, type: number }
+      - { name: created_at, type: datetime }
+      - { name: created_by, type: string }
+
+  - name: FlagPhotoLink
+    idKey: id
+    fields:
+      - { name: id, type: string, required: true }
+      - { name: flag_id, type: string, required: true }
+      - { name: photo_id, type: string, required: true }
+
+  - name: ReportTemplate
+    idKey: template_id
+    fields:
+      - { name: template_id, type: string, required: true }
+      - { name: project_id, type: string, required: true }
+      - { name: name, type: string, required: true }
+      - name: filter
+        type: object
+        fields:
+          - { name: start_week, type: string }
+          - { name: end_week, type: string }
+          - { name: flag_types, type: collection:string }
+          - { name: include_photos, type: boolean }
+      - { name: layout_options, type: object }
+      - { name: export, type: enum, values: [pdf, html] }
+
+  - name: Report
+    idKey: report_id
+    fields:
+      - { name: report_id, type: string, required: true }
+      - { name: project_id, type: string, required: true }
+      - { name: reporttype, type: enum, values: [Daily, Incident, Safety, Custom], required: true }
+      - { name: title, type: string }
+      - { name: week, type: string }
+      - { name: status, type: enum, values: [draft, final], default: draft }
+      - { name: author_project_contact_id, type: string }
+      - { name: summary, type: string }
+
+  - name: ReportFlagLink
+    idKey: id
+    fields:
+      - { name: id, type: string, required: true }
+      - { name: report_id, type: string, required: true }
+      - { name: flag_id, type: string, required: true }
+
+  - name: ReportPhotoLink
+    idKey: id
+    fields:
+      - { name: id, type: string, required: true }
+      - { name: report_id, type: string, required: true }
+      - { name: photo_id, type: string, required: true }
+
+  - name: RFI
+    idKey: rfi_id
+    fields:
+      - { name: rfi_id, type: string, required: true }
+      - { name: project_id, type: string, required: true }
+      - { name: subject, type: string, required: true }
+      - { name: question, type: string }
+      - { name: raised_by_project_contact_id, type: string }
+      - { name: created_at, type: datetime }
+
+  - name: RFIPhotoLink
+    idKey: id
+    fields:
+      - { name: id, type: string, required: true }
+      - { name: rfi_id, type: string, required: true }
+      - { name: photo_id, type: string, required: true }
+
+  - name: Submittal
+    idKey: submittal_id
+    fields:
+      - { name: submittal_id, type: string, required: true }
+      - { name: project_id, type: string, required: true }
+      - { name: spec_ref, type: string }
+      - { name: title, type: string }
+      - { name: submitted_by_project_contact_id, type: string }
+      - { name: created_at, type: datetime }
+
+  - name: SubmittalPhotoLink
+    idKey: id
+    fields:
+      - { name: id, type: string, required: true }
+      - { name: submittal_id, type: string, required: true }
+      - { name: photo_id, type: string, required: true }
+
+  - name: PunchItem
+    idKey: punch_id
+    fields:
+      - { name: punch_id, type: string, required: true }
+      - { name: project_id, type: string, required: true }
+      - { name: location, type: string }
+      - { name: description, type: string, required: true }
+      - { name: status, type: enum, values: [open, in_progress, complete], default: open }
+      - { name: assigned_to_project_contact_id, type: string }
+      - { name: created_at, type: datetime }
+
+  - name: PunchPhotoLink
+    idKey: id
+    fields:
+      - { name: id, type: string, required: true }
+      - { name: punch_id, type: string, required: true }
+      - { name: photo_id, type: string, required: true }
+
+  - name: ChangeOrder
+    idKey: co_id
+    fields:
+      - { name: co_id, type: string, required: true }
+      - { name: project_id, type: string, required: true }
+      - { name: title, type: string }
+      - { name: status, type: enum, values: [open, approved, rejected], default: open }
+      - { name: origin, type: enum, values: [rfi, owner, field] }
+      - { name: amount, type: number }
+      - { name: created_at, type: datetime }
+
+  - name: ChangeOrderPhotoLink
+    idKey: id
+    fields:
+      - { name: id, type: string, required: true }
+      - { name: co_id, type: string, required: true }
+      - { name: photo_id, type: string, required: true }
+
+  - name: ScheduleItem
+    idKey: schedule_id
+    fields:
+      - { name: schedule_id, type: string, required: true }
+      - { name: project_id, type: string, required: true }
+      - { name: week, type: string, required: true }      # YYYY-Www
+      - { name: label, type: string, required: true }
+      - { name: note, type: string }
+      - { name: pcsl_id, type: string, required: true }   # FK → ProjectContactScopeLink
+      - { name: activity_label, type: string, required: true }  # must be member of link.activity_labels
+      - { name: project_contact_id, type: string }        # derived from link
+      - { name: scopecode, type: string }                 # derived from link
+    rules:
+      - kind: derived
+        from: pcsl_id
+        sets: [project_contact_id, scopecode]
+      - kind: inclusion
+        field: activity_label
+        in: ProjectContactScopeLink.activity_labels
+
+  - name: Photo
+    idKey: photo_id
+    fields:
+      - { name: photo_id, type: string, required: true }
+      - { name: project_id, type: string, required: true }
+      - { name: taken_at, type: datetime }
+      - { name: week, type: string }
+      - { name: caption, type: string }
+      - { name: url, type: string, required: true }
+      - { name: tags, type: collection:string }
+
+  - name: ExternalLink
+    idKey: link_id
+    fields:
+      - { name: link_id, type: string, required: true }
+      - { name: project_id, type: string, required: true }
+      - { name: label, type: string, required: true }
+      - { name: url, type: string, required: true }
+      - { name: visibility, type: enum, values: [public, admin], default: public }
+      - { name: kind, type: enum, values: [plans, files, specs], default: plans }
+
+  - name: Subscription
+    idKey: subscription_id
+    fields:
+      - { name: subscription_id, type: string, required: true }
+      - { name: project_id, type: string, required: true }
+      - { name: subscriber, type: string, required: true }   # project_contact_id or email
+      - { name: events, type: collection:string }
+      - { name: channel, type: enum, values: [email, sms], default: email }
+      - { name: frequency, type: enum, values: [instant, daily, weekly], default: instant }
+
+  - name: NotificationEvent
+    idKey: event_id
+    fields:
+      - { name: event_id, type: string, required: true }
+      - { name: type, type: string, required: true }
+      - { name: project_id, type: string, required: true }
+      - { name: entity_type, type: string }
+      - { name: entity_id, type: string }
+      - { name: payload, type: object }
+      - { name: created_at, type: datetime }
+      - { name: delivered_to, type: collection:string }
+
+  - name: AuditEvent
+    idKey: event_id
+    fields:
+      - { name: event_id, type: string, required: true }
+      - { name: actor, type: string, required: true }
+      - { name: action, type: string, required: true }
+      - { name: entity, type: string, required: true }
+      - { name: entity_id, type: string, required: true }
+      - { name: before, type: object }
+      - { name: after, type: object }
+      - { name: at, type: datetime, required: true }
+
+  - name: AccessRequest
+    idKey: access_request_id
+    fields:
+      - { name: access_request_id, type: string, required: true }
+      - { name: project_id, type: string, required: true }
+      - { name: email_or_phone, type: string, required: true }
+      - { name: status, type: enum, values: [pending, approved, denied], default: pending }
+      - { name: requested_at, type: datetime }
+      - { name: decided_by_project_contact_id, type: string }
+      - { name: decision_note, type: string }
+
+  - name: ProjectAccess
+    idKey: project_access_id
+    fields:
+      - { name: project_access_id, type: string, required: true }
+      - { name: project_id, type: string, required: true }
+      - { name: project_contact_id, type: string, required: true }
+      - { name: role, type: enum, values: [Viewer, ProjectAdmin, ProjectOwner], default: Viewer }
+
+  - name: ShareLink
+    idKey: sharelink_id
+    fields:
+      - { name: sharelink_id, type: string, required: true }
+      - { name: project_id, type: string, required: true }
+      - { name: token, type: string, required: true }
+      - { name: scope, type: enum, values: [view], default: view }
+      - { name: expires_at, type: datetime }
+      - { name: created_at, type: datetime }
+
+routes:
+  # Auth
+  - name: login
+    method: POST
+    path: /auth/login
+    input:
+      email: string
+      project_id: string
+    output:
+      session:
+        project_contact_id: string
+        role: string
+        token: string
+    permissions: public
+
+  - name: logout
+    method: POST
+    path: /auth/logout
+    input: {}
+    output: { ok: boolean }
+    permissions: authenticated
+
+  # Projects
+  - name: create_project
+    method: POST
+    path: /projects
+    input:
+      name: string
+      client: string
+      location: string
+      creator_name: string
+      creator_email: string
+    output: Project
+    permissions: [AccountAdmin, ProjectOwner, ProjectAdmin]
+
+  - name: assign_project_owner
+    method: POST
+    path: /projects/{project_id}/owner
+    input:
+      project_contact_id: string
+    output: ProjectAccess
+    permissions: [AccountAdmin, ProjectOwner]
+
+  - name: list_projects
+    method: GET
+    path: /projects
+    input: {}
+    output: [Project]
+    permissions: authenticated
+
+  # Contacts & Scopes
+  - name: create_project_contact
+    method: POST
+    path: /projects/{project_id}/contacts
+    input:
+      name: string
+      email: string
+      phone: string?
+      company: string?
+      discipline: string?
+      role: string?
+      visibility: string?
+    output: ProjectContact
+    permissions: [ProjectOwner, ProjectAdmin]
+
+  - name: link_contact_scope
+    method: POST
+    path: /projects/{project_id}/contacts/{project_contact_id}/scopes
+    input:
+      scopecode: string
+      activity_labels: [string]
+      notes: string?
+    output: ProjectContactScopeLink
+    permissions: [ProjectOwner, ProjectAdmin]
+
+  - name: list_contact_scopes
+    method: GET
+    path: /projects/{project_id}/contacts/{project_contact_id}/scopes
+    input: {}
+    output: [ProjectContactScopeLink]
+    permissions: authenticated
+
+  # Flags & Photos
+  - name: create_flag
+    method: POST
+    path: /projects/{project_id}/flags
+    input:
+      kind: string
+      date: string            # Today | Enter Date
+      project_contact_id: string?
+      scopecode: string?
+      description: string?
+      crew_size: number?
+    output: Flag
+    permissions: authenticated
+
+  - name: upload_photo
+    method: POST
+    path: /projects/{project_id}/photos
+    input:
+      file_ref: string        # storage key
+      taken_at: datetime?
+      caption: string?
+      week: string?
+      tags: [string]?
+    output: Photo
+    permissions: authenticated
+
+  - name: attach_photo_to_flag
+    method: POST
+    path: /projects/{project_id}/flags/{flag_id}/photos
+    input:
+      photo_id: string
+    output: FlagPhotoLink
+    permissions: authenticated
+
+  # Reports
+  - name: create_report_template
+    method: POST
+    path: /projects/{project_id}/report-templates
+    input:
+      name: string
+      filter:
+        start_week: string?
+        end_week: string?
+        flag_types: [string]?
+        include_photos: boolean?
+      layout_options: object?
+      export: string?         # pdf | html
+    output: ReportTemplate
+    permissions: [ProjectOwner, ProjectAdmin]
+
+  - name: generate_report_from_template
+    method: POST
+    path: /projects/{project_id}/report-templates/{template_id}/generate
+    input:
+      week: string?
+      title: string?
+    output: Report
+    permissions: authenticated
+
+  # Schedule quick-pick (pcsl + activity)
+  - name: create_schedule_item
+    method: POST
+    path: /projects/{project_id}/schedule
+    input:
+      week: string
+      pcsl_id: string
+      activity_label: string
+      label: string
+      note: string?
+    output: ScheduleItem
+    permissions: [ProjectOwner, ProjectAdmin]
+
+  - name: list_schedule_by_week
+    method: GET
+    path: /projects/{project_id}/schedule
+    input:
+      week: string
+    output: [ScheduleItem]
+    permissions: authenticated
+
+  # Notifications
+  - name: subscribe
+    method: POST
+    path: /projects/{project_id}/subscriptions
+    input:
+      subscriber: string
+      events: [string]
+      channel: string?
+      frequency: string?
+    output: Subscription
+    permissions: authenticated
+
+workflows:
+  - name: project_creation
+    trigger: "User clicks New Project"
+    steps:
+      - route: create_project
+      - route: create_project_contact      # create self/owner contact
+      - route: assign_project_owner
+    side_effects:
+      - log: AuditEvent
+      - notify:
+          event: project.created
+          to_roles: [AccountAdmin, ProjectOwner]
+
+  - name: flag_flow
+    trigger: "User clicks Flag (Mark On Site or Report Issue)"
+    steps:
+      - decision:
+          when: kind == "On Site"
+          then:
+            - route: create_flag
+            - optional: route: upload_photo
+              attach_with: attach_photo_to_flag
+          else:
+            - route: create_flag
+            - optional: route: upload_photo
+              attach_with: attach_photo_to_flag
+    side_effects:
+      - notify:
+          event: flag.created
+          subscribers: event.flag.created
+
+  - name: weekly_report_generation
+    trigger: "User selects Report Template -> Generate"
+    steps:
+      - route: generate_report_from_template
+    side_effects:
+      - log: AuditEvent
+      - notify:
+          event: report.generated
+          subscribers: event.report.generated
+
+  - name: schedule_quick_pick
+    trigger: "User selects Contact → Scope → Activity → Week"
+    steps:
+      - route: create_schedule_item
+    rules:
+      - ensure:
+          activity_label_in_pcsl: true     # inclusion rule
+    side_effects:
+      - notify:
+          event: scheduleitem.created
+          subscribers: event.scheduleitem.created
+
+ui:
+  - name: Login
+    type: page
+  - name: ProjectList
+    type: page
+  - name: ProjectDashboard
+    type: page
+  - name: ProjectSettingsModal
+    type: modal
+  - name: FlagModal
+    type: modal
+  - name: ContactDetail
+    type: modal
+  - name: ProjectViewOnlyAuth
+    type: Modal
+  - name: ProjectViewOnly
+    type: page    
+  - name: Plans/Files
+    type: page
+  - name: Logs
+    type: page 
+  - name: Reports
+    type: page
+  - name: ReportBuilder
+    type: modal    
+  - name: ScopeManager
+    type: page
+  - name: Photos
+    type: page
+  - name: Schedule
+    type: page    
