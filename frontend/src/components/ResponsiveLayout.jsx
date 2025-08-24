@@ -4,9 +4,9 @@ import { useOfflineQueue } from '@/lib/offlineQueue';
 export default function ResponsiveLayout({ sidebar, children }) {
   const { online, queued } = useOfflineQueue();
   return (
-    <div className="grid min-h-screen grid-cols-1 md:grid-cols-1 lg:grid-cols-[250px_1fr]">
+    <div className="grid min-h-screen grid-cols-1 md:grid-cols-[250px_1fr]">
       {sidebar && (
-        <aside className="border-b p-4 lg:border-b-0 lg:border-r">
+        <aside className="border-b p-4 md:border-b-0 md:border-r">
           {sidebar}
         </aside>
       )}
