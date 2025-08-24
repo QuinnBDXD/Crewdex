@@ -7,6 +7,9 @@ jest.mock('../src/db', () => ({
     projectContact: {
       findUnique: jest.fn(),
     },
+    projectAccess: {
+      findMany: jest.fn(),
+    },
   },
 }));
 
@@ -26,6 +29,9 @@ describe('POST /auth/login', () => {
       role: 'Viewer',
       password_hash: hash,
     });
+    (prisma.projectAccess.findMany as jest.Mock).mockResolvedValue([
+      { project_id: 'proj1', role: 'Viewer' },
+    ]);
 
     const res = await request(app)
       .post('/auth/login')
@@ -37,6 +43,7 @@ describe('POST /auth/login', () => {
       account_id: 'acc1',
       project_contact_id: 'pc1',
       role: 'Viewer',
+      project_roles: { proj1: 'Viewer' },
     });
   });
 
@@ -48,6 +55,9 @@ describe('POST /auth/login', () => {
       role: 'Viewer',
       password_hash: hash,
     });
+    (prisma.projectAccess.findMany as jest.Mock).mockResolvedValue([
+      { project_id: 'proj1', role: 'Viewer' },
+    ]);
 
     const res = await request(app)
       .post('/auth/login')
@@ -58,6 +68,7 @@ describe('POST /auth/login', () => {
 
   it('rejects when project scope does not match', async () => {
     (prisma.projectContact.findUnique as jest.Mock).mockResolvedValue(null);
+    (prisma.projectAccess.findMany as jest.Mock).mockResolvedValue([]);
 
     const res = await request(app)
       .post('/auth/login')
