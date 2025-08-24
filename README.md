@@ -15,11 +15,23 @@ The `pnpm dev` script launches the backend API and the frontend client concurren
 
 ## Authentication and RBAC
 
-Users authenticate with email and password (or OAuth). Successful login issues a JWT containing:
+Users authenticate with email, password, and a project ID. Passwords are stored as hashes and verified using `bcrypt.compare`. Successful login issues a JWT containing:
 
 - `account_id`
 - `project_contact_id`
 - `role`
+
+The login request must include the following JSON body:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "plain-text password",
+  "project_id": "project identifier"
+}
+```
+
+The `project_id` ensures the session is scoped to the selected project.
 
 Role-based access control (RBAC) is enforced on every route. Supported roles include:
 
