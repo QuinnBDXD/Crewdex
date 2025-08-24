@@ -36,6 +36,7 @@ export async function flushQueue() {
         method: item.method,
         headers: item.headers,
         body: item.body,
+        credentials: 'include',
       });
       const db = await openDb();
       await new Promise((resolve, reject) => {

@@ -31,12 +31,17 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
       JWT_SECRET,
       { expiresIn: '1h' },
     );
+    res.cookie('token', token, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 1000,
+    });
     return res.json({
       session: {
         account_id: contact.account_id,
         project_contact_id: contact.project_contact_id,
         role: contact.role || '',
-        token,
       },
     });
   } catch (err) {

@@ -32,7 +32,12 @@ describe('POST /auth/login', () => {
       .send({ email: 'user@example.com', password, project_id: 'proj1' });
 
     expect(res.status).toBe(200);
-    expect(res.body.session).toHaveProperty('token');
+    expect(res.headers['set-cookie']).toBeDefined();
+    expect(res.body.session).toEqual({
+      account_id: 'acc1',
+      project_contact_id: 'pc1',
+      role: 'Viewer',
+    });
   });
 
   it('rejects invalid password', async () => {

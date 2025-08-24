@@ -18,16 +18,13 @@ export default function Login() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password, project_id: projectId }),
+        credentials: 'include',
       });
       if (!res.ok) {
         throw new Error('Login failed');
       }
-      const data = await res.json();
-      const token = data?.session?.token;
-      if (token) {
-        localStorage.setItem('token', token);
-        navigate('/projects');
-      }
+      await res.json();
+      navigate('/projects');
     } catch (err) {
       console.error(err);
     }

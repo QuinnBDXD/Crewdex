@@ -26,7 +26,7 @@ self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method === 'POST' || req.method === 'PUT') {
     event.respondWith(
-      fetch(req.clone()).catch(async () => {
+      fetch(req.clone(), { credentials: 'include' }).catch(async () => {
         const headers = {};
         req.headers.forEach((value, key) => (headers[key] = value));
         const body = await req.clone().text();
