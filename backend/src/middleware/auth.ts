@@ -10,7 +10,11 @@ export interface AuthenticatedRequest extends Request {
   user?: AuthUser;
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is not set');
+}
 
 export const authMiddleware = (allowedRoles: string[] = []) => {
   return (req: Request, res: Response, next: NextFunction) => {

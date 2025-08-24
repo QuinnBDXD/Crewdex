@@ -4,12 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node src/index.ts",
+    "dev": "JWT_SECRET=dev-secret npx ts-node src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "JWT_SECRET=dev-secret node dist/index.js",
     "db:migrate": "prisma migrate deploy",
     "db:seed": "prisma db seed",
-    "test": "jest"
+    "test": "JWT_SECRET=test-secret npx jest"
   },
   "keywords": [],
   "author": "",
