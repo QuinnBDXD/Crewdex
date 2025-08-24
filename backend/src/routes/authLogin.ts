@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import { prisma } from '../db';
 import { HttpError } from '../middleware/errorHandler';
 
@@ -15,7 +16,10 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     const contact: any = await prisma.projectContact.findUnique({
       where: { project_id_email: { project_id, email } },
     });
-    if (!contact || contact.password !== password) {
+    if (
+      !contact ||
+      !(await bcrypt.compare(password, contact.password_hash || ''))
+    ) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
     const token = jwt.sign(

@@ -6,6 +6,7 @@ import ResponsiveLayout from '@/components/ResponsiveLayout';
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [projectId, setProjectId] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -16,7 +17,7 @@ export default function Login() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, project_id: projectId }),
       });
       if (!res.ok) {
         throw new Error('Login failed');
@@ -50,6 +51,13 @@ export default function Login() {
             className="w-full rounded border p-2"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Project ID"
+            className="w-full rounded border p-2"
+            value={projectId}
+            onChange={(e) => setProjectId(e.target.value)}
           />
           <Button className="w-full" type="submit">
             Sign In
