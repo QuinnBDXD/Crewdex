@@ -31,6 +31,10 @@ async function getAllRequests() {
 export async function flushQueue() {
   const requests = await getAllRequests();
   for (const item of requests) {
+    // Skip requests that are waiting for their next retry window
+    if (item.nextRetryAt && Date.now() < item.nextRetryAt) {
+      continue;
+    }
     try {
       const response = await fetch(item.url, {
         method: item.method,
@@ -56,6 +60,9 @@ export async function flushQueue() {
     } catch (err) {
       console.error('Re-queuing request after failure', err);
       item.retryCount = (item.retryCount || 0) + 1;
+      const delaySeconds = 2 ** item.retryCount;
+      // Store next retry timestamp to implement exponential backoff
+      item.nextRetryAt = Date.now() + delaySeconds * 1000;
       const db = await openDb();
       await new Promise((resolve, reject) => {
         const tx = db.transaction(STORE_NAME, 'readwrite');

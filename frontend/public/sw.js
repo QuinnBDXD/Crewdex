@@ -37,6 +37,7 @@ self.addEventListener('fetch', (event) => {
           body,
           createdAt: Date.now(),
           retryCount: 0,
+          nextRetryAt: Date.now(), // allow immediate retry
         });
         return new Response(
           JSON.stringify({ error: 'offline', queued: true }),

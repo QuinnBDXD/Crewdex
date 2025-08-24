@@ -59,4 +59,6 @@ Once installed, Crewdex works offline:
   connectivity returns.
 - The header displays an offline badge and the number of queued requests.
 - Update prompts appear when a new version is available.
+- Queued requests retry with exponential backoff (`2^retryCount` seconds)
+  and are skipped until their scheduled retry time.
 
