@@ -1,17 +1,20 @@
 import { Link } from 'react-router-dom';
+import ResponsiveLayout from '@/components/ResponsiveLayout';
+import ResponsiveList from '@/components/ResponsiveList';
 
 export default function ProjectList() {
   const projects = [{ id: '1', name: 'Demo Project' }];
+  const columns = [
+    {
+      key: 'name',
+      header: 'Name',
+      render: (p) => <Link to={`/projects/${p.id}`}>{p.name}</Link>,
+    },
+  ];
   return (
-    <div className="p-4">
+    <ResponsiveLayout sidebar={<div>Sidebar</div>}>
       <h1 className="mb-4 text-xl font-bold">Projects</h1>
-      <ul className="space-y-2">
-        {projects.map((p) => (
-          <li key={p.id} className="rounded border p-2 hover:bg-accent">
-            <Link to={`/projects/${p.id}`}>{p.name}</Link>
-          </li>
-        ))}
-      </ul>
-    </div>
+      <ResponsiveList items={projects} columns={columns} />
+    </ResponsiveLayout>
   );
 }
