@@ -1,0 +1,481 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRoleName {
+  ACCOUNT_ADMIN @map("AccountAdmin")
+  PROJECT_OWNER @map("ProjectOwner")
+  PROJECT_ADMIN @map("ProjectAdmin")
+  VIEWER @map("Viewer")
+}
+
+enum ProjectContactVisibility {
+  PUBLIC @map("public")
+  INTERNAL @map("internal")
+}
+
+enum FlagKind {
+  ON_SITE @map("On Site")
+  QUALITY @map("Quality")
+  SAFETY @map("Safety")
+  LAGGING @map("Lagging")
+}
+
+enum FlagDate {
+  TODAY @map("Today")
+  ENTER_DATE @map("Enter Date")
+}
+
+enum ReportTemplateExport {
+  PDF @map("pdf")
+  HTML @map("html")
+}
+
+enum ReportType {
+  DAILY @map("Daily")
+  INCIDENT @map("Incident")
+  SAFETY @map("Safety")
+  CUSTOM @map("Custom")
+}
+
+enum ReportStatus {
+  DRAFT @map("draft")
+  FINAL @map("final")
+}
+
+enum PunchItemStatus {
+  OPEN @map("open")
+  IN_PROGRESS @map("in_progress")
+  COMPLETE @map("complete")
+}
+
+enum ChangeOrderStatus {
+  OPEN @map("open")
+  APPROVED @map("approved")
+  REJECTED @map("rejected")
+}
+
+enum ChangeOrderOrigin {
+  RFI @map("rfi")
+  OWNER @map("owner")
+  FIELD @map("field")
+}
+
+enum ExternalLinkVisibility {
+  PUBLIC @map("public")
+  ADMIN @map("admin")
+}
+
+enum ExternalLinkKind {
+  PLANS @map("plans")
+  FILES @map("files")
+  SPECS @map("specs")
+}
+
+enum SubscriptionChannel {
+  EMAIL @map("email")
+  SMS @map("sms")
+}
+
+enum SubscriptionFrequency {
+  INSTANT @map("instant")
+  DAILY @map("daily")
+  WEEKLY @map("weekly")
+}
+
+enum AccessRequestStatus {
+  PENDING @map("pending")
+  APPROVED @map("approved")
+  DENIED @map("denied")
+}
+
+enum ProjectAccessRole {
+  VIEWER @map("Viewer")
+  PROJECT_ADMIN @map("ProjectAdmin")
+  PROJECT_OWNER @map("ProjectOwner")
+}
+
+enum ShareLinkScope {
+  VIEW @map("view")
+}
+
+model Account {
+  account_id String   @id @default(uuid())
+  name       String
+  created_at DateTime?
+}
+
+model UserRole {
+  role_id     String        @id @default(uuid())
+  name        UserRoleName
+  permissions String[]
+  account_id  String
+
+  @@index([account_id])
+}
+
+model Project {
+  project_id    String   @id @default(uuid())
+  name          String
+  number        String?
+  client        String?
+  location      String?
+  start_date    DateTime?
+  end_date      DateTime?
+  creator_name  String?
+  creator_email String?
+  account_id    String
+
+  @@index([account_id])
+}
+
+model ProjectContact {
+  project_contact_id String   @id @default(uuid())
+  project_id         String
+  name               String
+  email              String
+  phone              String?
+  company            String?
+  discipline         String?
+  role               String?
+  visibility         ProjectContactVisibility @default(PUBLIC)
+  account_id         String
+
+  @@unique([project_id, email])
+  @@index([account_id])
+  @@index([project_id])
+}
+
+model ContactGroup {
+  group_id                   String   @id @default(uuid())
+  project_id                 String
+  name                       String
+  member_project_contact_ids String[]
+  account_id                 String
+
+  @@index([account_id])
+  @@index([project_id])
+}
+
+model Scope {
+  scopecode  String @id @default(uuid())
+  name       String
+  account_id String
+
+  @@index([account_id])
+}
+
+model ProjectContactScopeLink {
+  pcsl_id            String   @id @default(uuid())
+  project_id         String
+  project_contact_id String
+  scopecode          String
+  activity_labels    String[]
+  notes              String?
+  account_id         String
+
+  @@unique([project_id, project_contact_id, scopecode])
+  @@index([account_id])
+  @@index([project_id])
+}
+
+model Flag {
+  flag_id            String   @id @default(uuid())
+  project_id         String
+  project_contact_id String?
+  kind               FlagKind
+  date               FlagDate
+  scopecode          String?
+  description        String?
+  crew_size          Float?
+  created_at         DateTime?
+  created_by         String?
+  account_id         String
+
+  @@index([account_id])
+  @@index([project_id])
+}
+
+model FlagPhotoLink {
+  id         String @id @default(uuid())
+  flag_id    String
+  photo_id   String
+  account_id String
+
+  @@index([account_id])
+  @@index([flag_id])
+}
+
+model ReportTemplate {
+  template_id   String   @id @default(uuid())
+  project_id    String
+  name          String
+  filter        Json?
+  layout_options Json?
+  export        ReportTemplateExport?
+  account_id    String
+
+  @@index([account_id])
+  @@index([project_id])
+}
+
+model Report {
+  report_id                 String   @id @default(uuid())
+  project_id                String
+  reporttype                ReportType
+  title                     String?
+  week                      String?
+  status                    ReportStatus @default(DRAFT)
+  author_project_contact_id String?
+  summary                   String?
+  account_id                String
+
+  @@index([account_id])
+  @@index([project_id])
+  @@index([week])
+}
+
+model ReportFlagLink {
+  id         String @id @default(uuid())
+  report_id  String
+  flag_id    String
+  account_id String
+
+  @@index([account_id])
+  @@index([report_id])
+}
+
+model ReportPhotoLink {
+  id         String @id @default(uuid())
+  report_id  String
+  photo_id   String
+  account_id String
+
+  @@index([account_id])
+  @@index([report_id])
+}
+
+model RFI {
+  rfi_id                       String   @id @default(uuid())
+  project_id                   String
+  subject                      String
+  question                     String?
+  raised_by_project_contact_id String?
+  created_at                   DateTime?
+  account_id                   String
+
+  @@index([account_id])
+  @@index([project_id])
+}
+
+model RFIPhotoLink {
+  id         String @id @default(uuid())
+  rfi_id     String
+  photo_id   String
+  account_id String
+
+  @@index([account_id])
+  @@index([rfi_id])
+}
+
+model Submittal {
+  submittal_id                  String   @id @default(uuid())
+  project_id                    String
+  spec_ref                      String?
+  title                         String?
+  submitted_by_project_contact_id String?
+  created_at                    DateTime?
+  account_id                    String
+
+  @@index([account_id])
+  @@index([project_id])
+}
+
+model SubmittalPhotoLink {
+  id          String @id @default(uuid())
+  submittal_id String
+  photo_id     String
+  account_id   String
+
+  @@index([account_id])
+  @@index([submittal_id])
+}
+
+model PunchItem {
+  punch_id                   String   @id @default(uuid())
+  project_id                 String
+  location                   String?
+  description                String
+  status                     PunchItemStatus @default(OPEN)
+  assigned_to_project_contact_id String?
+  created_at                 DateTime?
+  account_id                 String
+
+  @@index([account_id])
+  @@index([project_id])
+}
+
+model PunchPhotoLink {
+  id         String @id @default(uuid())
+  punch_id   String
+  photo_id   String
+  account_id String
+
+  @@index([account_id])
+  @@index([punch_id])
+}
+
+model ChangeOrder {
+  co_id      String   @id @default(uuid())
+  project_id String
+  title      String?
+  status     ChangeOrderStatus @default(OPEN)
+  origin     ChangeOrderOrigin?
+  amount     Float?
+  created_at DateTime?
+  account_id String
+
+  @@index([account_id])
+  @@index([project_id])
+}
+
+model ChangeOrderPhotoLink {
+  id         String @id @default(uuid())
+  co_id      String
+  photo_id   String
+  account_id String
+
+  @@index([account_id])
+  @@index([co_id])
+}
+
+model ScheduleItem {
+  schedule_id        String   @id @default(uuid())
+  project_id         String
+  week               String
+  label              String
+  note               String?
+  pcsl_id            String
+  activity_label     String
+  project_contact_id String?
+  scopecode          String?
+  account_id         String
+
+  @@index([account_id])
+  @@index([project_id])
+  @@index([week])
+}
+
+model Photo {
+  photo_id  String   @id @default(uuid())
+  project_id String
+  taken_at  DateTime?
+  week      String?
+  caption   String?
+  url       String
+  tags      String[]
+  account_id String
+
+  @@index([account_id])
+  @@index([project_id])
+  @@index([week])
+}
+
+model ExternalLink {
+  link_id    String   @id @default(uuid())
+  project_id String
+  label      String
+  url        String
+  visibility ExternalLinkVisibility @default(PUBLIC)
+  kind       ExternalLinkKind @default(PLANS)
+  account_id String
+
+  @@index([account_id])
+  @@index([project_id])
+}
+
+model Subscription {
+  subscription_id String   @id @default(uuid())
+  project_id      String
+  subscriber      String
+  events          String[]
+  channel         SubscriptionChannel @default(EMAIL)
+  frequency       SubscriptionFrequency @default(INSTANT)
+  account_id      String
+
+  @@index([account_id])
+  @@index([project_id])
+}
+
+model NotificationEvent {
+  event_id    String   @id @default(uuid())
+  type        String
+  project_id  String
+  entity_type String?
+  entity_id   String?
+  payload     Json?
+  created_at  DateTime?
+  delivered_to String[]
+  account_id  String
+
+  @@index([account_id])
+  @@index([project_id])
+}
+
+model AuditEvent {
+  event_id   String   @id @default(uuid())
+  actor      String
+  action     String
+  entity     String
+  entity_id  String
+  before     Json?
+  after      Json?
+  at         DateTime
+  account_id String
+
+  @@index([account_id])
+}
+
+model AccessRequest {
+  access_request_id            String   @id @default(uuid())
+  project_id                   String
+  email_or_phone               String
+  status                       AccessRequestStatus @default(PENDING)
+  requested_at                 DateTime?
+  decided_by_project_contact_id String?
+  decision_note                String?
+  account_id                   String
+
+  @@index([account_id])
+  @@index([project_id])
+}
+
+model ProjectAccess {
+  project_access_id String   @id @default(uuid())
+  project_id        String
+  project_contact_id String
+  role              ProjectAccessRole @default(VIEWER)
+  account_id        String
+
+  @@index([account_id])
+  @@index([project_id])
+}
+
+model ShareLink {
+  sharelink_id String   @id @default(uuid())
+  project_id   String
+  token        String
+  scope        ShareLinkScope @default(VIEW)
+  expires_at   DateTime?
+  created_at   DateTime?
+  account_id   String
+
+  @@index([account_id])
+  @@index([project_id])
+}
+
