@@ -17,63 +17,75 @@ function openDb() {
   });
 }
 
-async function getAllRequests() {
-  const db = await openDb();
+async function getAllRequests(db) {
+  const database = db || (await openDb());
   return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readonly');
+    const tx = database.transaction(STORE_NAME, 'readonly');
     const store = tx.objectStore(STORE_NAME);
     const req = store.getAll();
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
+    req.onsuccess = () => {
+      resolve(req.result);
+      if (!db) database.close();
+    };
+    req.onerror = () => {
+      reject(req.error);
+      if (!db) database.close();
+    };
   });
 }
 
 export async function flushQueue() {
-  const requests = await getAllRequests();
-  for (const item of requests) {
-    // Skip requests that are waiting for their next retry window
-    if (item.nextRetryAt && Date.now() < item.nextRetryAt) {
-      continue;
-    }
-    try {
-      const response = await fetch(item.url, {
-        method: item.method,
-        headers: item.headers,
-        body: item.body,
-        credentials: 'include',
-      });
-      if (!response.ok) {
-        console.error('Request failed', {
-          url: item.url,
-          status: response.status,
-          statusText: response.statusText,
-        });
-        throw new Error(`Request failed with status ${response.status}`);
+  let db;
+  try {
+    db = await openDb();
+    const requests = await getAllRequests(db);
+    for (const item of requests) {
+      // Skip requests that are waiting for their next retry window
+      if (item.nextRetryAt && Date.now() < item.nextRetryAt) {
+        continue;
       }
-      const db = await openDb();
-      await new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, 'readwrite');
-        tx.oncomplete = resolve;
-        tx.onerror = () => reject(tx.error);
-        tx.objectStore(STORE_NAME).delete(item.id);
-      });
-    } catch (err) {
-      console.error('Re-queuing request after failure', err);
-      item.retryCount = (item.retryCount || 0) + 1;
-      const delaySeconds = 2 ** item.retryCount;
-      // Store next retry timestamp to implement exponential backoff
-      item.nextRetryAt = Date.now() + delaySeconds * 1000;
-      const db = await openDb();
-      await new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, 'readwrite');
-        tx.oncomplete = resolve;
-        tx.onerror = () => reject(tx.error);
-        tx.objectStore(STORE_NAME).put(item);
-      });
+      try {
+        const response = await fetch(item.url, {
+          method: item.method,
+          headers: item.headers,
+          body: item.body,
+          credentials: 'include',
+        });
+        if (!response.ok) {
+          console.error('Request failed', {
+            url: item.url,
+            status: response.status,
+            statusText: response.statusText,
+          });
+          throw new Error(`Request failed with status ${response.status}`);
+        }
+        await new Promise((resolve, reject) => {
+          const tx = db.transaction(STORE_NAME, 'readwrite');
+          tx.oncomplete = resolve;
+          tx.onerror = () => reject(tx.error);
+          tx.objectStore(STORE_NAME).delete(item.id);
+        });
+      } catch (err) {
+        console.error('Re-queuing request after failure', err);
+        item.retryCount = (item.retryCount || 0) + 1;
+        const delaySeconds = 2 ** item.retryCount;
+        // Store next retry timestamp to implement exponential backoff
+        item.nextRetryAt = Date.now() + delaySeconds * 1000;
+        await new Promise((resolve, reject) => {
+          const tx = db.transaction(STORE_NAME, 'readwrite');
+          tx.oncomplete = resolve;
+          tx.onerror = () => reject(tx.error);
+          tx.objectStore(STORE_NAME).put(item);
+        });
+      }
     }
-  }
-  if (typeof window !== 'undefined') {
-    window.dispatchEvent(new Event('offline-queue-update'));
+  } catch (err) {
+    console.error('Failed to flush offline queue', err);
+  } finally {
+    if (db) db.close();
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('offline-queue-update'));
+    }
   }
 }
 
