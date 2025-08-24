@@ -35,27 +35,39 @@ export default function Login() {
       <div className="flex min-h-screen items-center justify-center">
         <form className="w-full max-w-sm space-y-4" onSubmit={handleSubmit}>
           <h1 className="text-center text-2xl font-bold">Login</h1>
-          <input
-            type="email"
-            placeholder="Email"
-            className="w-full rounded border p-2"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            className="w-full rounded border p-2"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Project ID"
-            className="w-full rounded border p-2"
-            value={projectId}
-            onChange={(e) => setProjectId(e.target.value)}
-          />
+          <label htmlFor="email" className="block">
+            <span className="mb-1 block">Email</span>
+            <input
+              id="email"
+              type="email"
+              placeholder="Email"
+              className="w-full rounded border p-2"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </label>
+          <label htmlFor="password" className="block">
+            <span className="mb-1 block">Password</span>
+            <input
+              id="password"
+              type="password"
+              placeholder="Password"
+              className="w-full rounded border p-2"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </label>
+          <label htmlFor="projectId" className="block">
+            <span className="mb-1 block">Project ID</span>
+            <input
+              id="projectId"
+              type="text"
+              placeholder="Project ID"
+              className="w-full rounded border p-2"
+              value={projectId}
+              onChange={(e) => setProjectId(e.target.value)}
+            />
+          </label>
           <Button className="w-full" type="submit">
             Sign In
           </Button>
