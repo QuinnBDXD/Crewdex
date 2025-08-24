@@ -1,18 +1,19 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, Response, NextFunction } from 'express';
 import { prisma } from '../db';
 import { HttpError } from '../middleware/errorHandler';
+import { AuthenticatedRequest } from '../middleware/auth';
 
 const router = Router();
 
 // Create a new account
-router.post('/', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const { name } = req.body || {};
   if (!name) {
     return next(new HttpError(400, 'name required'));
   }
   try {
     const account = await prisma.account.create({
-      data: { name },
+      data: { account_id: req.user!.account_id, name },
     });
     return res.json(account);
   } catch (err) {
@@ -21,9 +22,11 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // List all accounts
-router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
+router.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const accounts = await prisma.account.findMany();
+    const accounts = await prisma.account.findMany({
+      where: { account_id: req.user!.account_id },
+    });
     return res.json(accounts);
   } catch (err) {
     return next(new HttpError(500, 'Failed to fetch accounts'));

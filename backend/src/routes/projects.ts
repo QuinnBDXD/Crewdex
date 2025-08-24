@@ -1,23 +1,39 @@
-import { Router, Request, Response } from 'express';
+import { Router, Response } from 'express';
+import { prisma } from '../db';
+import { AuthenticatedRequest } from '../middleware/auth';
 
 const router = Router();
 
-router.post('/', (req: Request, res: Response) => {
+router.post('/', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const required = ['name', 'client', 'location', 'creator_name', 'creator_email'];
     const missing = required.find((f) => !req.body || !req.body[f]);
     if (missing) {
       return res.status(400).json({ error: `${missing} required` });
     }
-    return res.json({});
+    const { name, client, location, creator_name, creator_email } = req.body;
+    const project = await prisma.project.create({
+      data: {
+        account_id: req.user!.account_id,
+        name,
+        client,
+        location,
+        creator_name,
+        creator_email,
+      },
+    });
+    return res.json(project);
   } catch (err) {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
-router.get('/', (_req: Request, res: Response) => {
+router.get('/', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    return res.json([]);
+    const projects = await prisma.project.findMany({
+      where: { account_id: req.user!.account_id },
+    });
+    return res.json(projects);
   } catch (err) {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
