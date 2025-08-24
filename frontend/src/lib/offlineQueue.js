@@ -1,0 +1,98 @@
+import { useEffect, useState } from 'react';
+
+const DB_NAME = 'offline-queue';
+const STORE_NAME = 'requests';
+
+function openDb() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 1);
+    request.onupgradeneeded = () => {
+      request.result.createObjectStore(STORE_NAME, {
+        keyPath: 'id',
+        autoIncrement: true,
+      });
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function getAllRequests() {
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    const req = store.getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+export async function flushQueue() {
+  const requests = await getAllRequests();
+  for (const item of requests) {
+    try {
+      await fetch(item.url, {
+        method: item.method,
+        headers: item.headers,
+        body: item.body,
+      });
+      const db = await openDb();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.oncomplete = resolve;
+        tx.onerror = () => reject(tx.error);
+        tx.objectStore(STORE_NAME).delete(item.id);
+      });
+    } catch {
+      item.retryCount = (item.retryCount || 0) + 1;
+      const db = await openDb();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.oncomplete = resolve;
+        tx.onerror = () => reject(tx.error);
+        tx.objectStore(STORE_NAME).put(item);
+      });
+    }
+  }
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('offline-queue-update'));
+  }
+}
+
+export function initOfflineQueue() {
+  if (typeof window !== 'undefined') {
+    window.addEventListener('online', flushQueue);
+    if (navigator.onLine) {
+      flushQueue();
+    }
+  }
+}
+
+export async function getQueueLength() {
+  const requests = await getAllRequests();
+  return requests.length;
+}
+
+export function useOfflineQueue() {
+  const [online, setOnline] = useState(navigator.onLine);
+  const [queued, setQueued] = useState(0);
+
+  useEffect(() => {
+    async function update() {
+      setOnline(navigator.onLine);
+      setQueued(await getQueueLength());
+    }
+    update();
+    window.addEventListener('online', update);
+    window.addEventListener('offline', update);
+    window.addEventListener('offline-queue-update', update);
+    return () => {
+      window.removeEventListener('online', update);
+      window.removeEventListener('offline', update);
+      window.removeEventListener('offline-queue-update', update);
+    };
+  }, []);
+
+  return { online, queued };
+}

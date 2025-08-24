@@ -40,9 +40,11 @@ To install the app:
 2. Use the browser's **Install** or **Add to Home Screen** option.
 3. Launch Crewdex from the installed app icon.
 
-Once the service worker and caching are implemented, Crewdex will support:
+Once installed, Crewdex works offline:
 
-- Offline access to previously viewed data.
-- Queued writes that sync when connectivity returns.
-- An offline indicator and update prompts when a new version is available.
+- Previously viewed data is served from cache.
+- Failed `POST`/`PUT` requests are stored in IndexedDB and retried when
+  connectivity returns.
+- The header displays an offline badge and the number of queued requests.
+- Update prompts appear when a new version is available.
 
