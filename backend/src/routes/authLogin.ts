@@ -22,11 +22,20 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     ) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
+    const accesses = await prisma.projectAccess.findMany({
+      where: { project_contact_id: contact.project_contact_id },
+      select: { project_id: true, role: true },
+    });
+    const project_roles: Record<string, string> = {};
+    accesses.forEach((a: { project_id: string; role: string }) => {
+      project_roles[a.project_id] = a.role;
+    });
     const token = jwt.sign(
       {
         account_id: contact.account_id,
         project_contact_id: contact.project_contact_id,
         role: contact.role || '',
+        project_roles,
       },
       JWT_SECRET,
       { expiresIn: '1h' },
@@ -42,6 +51,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
         account_id: contact.account_id,
         project_contact_id: contact.project_contact_id,
         role: contact.role || '',
+        project_roles,
       },
     });
   } catch (err) {

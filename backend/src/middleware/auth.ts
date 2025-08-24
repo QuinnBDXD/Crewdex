@@ -4,6 +4,8 @@ import jwt from 'jsonwebtoken';
 export interface AuthUser {
   account_id: string;
   role: string;
+  project_contact_id: string;
+  project_roles: Record<string, string>;
 }
 
 export interface AuthenticatedRequest extends Request {
@@ -30,6 +32,8 @@ export const authMiddleware = (allowedRoles: string[] = []) => {
       (req as AuthenticatedRequest).user = {
         account_id: payload.account_id,
         role: payload.role,
+        project_contact_id: payload.project_contact_id,
+        project_roles: payload.project_roles || {},
       };
       if (allowedRoles.length && !allowedRoles.includes(payload.role)) {
         return res.status(403).json({ error: 'Forbidden' });
