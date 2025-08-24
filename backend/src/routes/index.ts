@@ -14,12 +14,16 @@ import reportTemplateGenerate from './reportTemplateGenerate';
 import projectSchedule from './projectSchedule';
 import projectSubscriptions from './projectSubscriptions';
 import billing from './billing';
+import { auth } from '../middleware/auth';
 
 const router = Router();
 
 router.use('/auth/login', authLogin);
 router.use('/auth/logout', authLogout);
 router.use('/accounts', accounts);
+
+// Ensure all routes below require authentication
+router.use(auth);
 router.use('/projects', projects);
 router.use('/projects/:project_id/owner', projectOwner);
 router.use('/projects/:project_id/contacts', projectContacts);

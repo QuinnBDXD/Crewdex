@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { prisma } from '../db';
 import { HttpError } from '../middleware/errorHandler';
+import { auth } from '../middleware/auth';
 
 const router = Router();
 
@@ -20,11 +21,19 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-// List all accounts
-router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
+// All routes below this line require authentication
+router.use(auth);
+
+// Fetch the authenticated account
+router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const accounts = await prisma.account.findMany();
-    return res.json(accounts);
+    const account = await prisma.account.findUnique({
+      where: { id: req.account_id },
+    });
+    if (!account) {
+      return next(new HttpError(404, 'Account not found'));
+    }
+    return res.json(account);
   } catch (err) {
     return next(new HttpError(500, 'Failed to fetch accounts'));
   }
