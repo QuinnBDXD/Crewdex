@@ -3,6 +3,9 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../db';
 import { HttpError } from '../middleware/errorHandler';
+import type { Prisma, ProjectContact } from '@prisma/client';
+
+type AuthProjectContact = ProjectContact & { password_hash: string | null };
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
@@ -13,12 +16,13 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     return next(new HttpError(400, 'email, password and project_id required'));
   }
   try {
-    const contact: any = await prisma.projectContact.findUnique({
+    const contact = (await prisma.projectContact.findUnique({
       where: { project_id_email: { project_id, email } },
-    });
+    })) as AuthProjectContact | null;
     if (
       !contact ||
-      !(await bcrypt.compare(password, contact.password_hash || ''))
+      !contact.password_hash ||
+      !(await bcrypt.compare(password, contact.password_hash))
     ) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -26,7 +30,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
       {
         account_id: contact.account_id,
         project_contact_id: contact.project_contact_id,
-        role: contact.role || '',
+        role: contact.role,
       },
       JWT_SECRET,
       { expiresIn: '1h' },
@@ -35,7 +39,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
       session: {
         account_id: contact.account_id,
         project_contact_id: contact.project_contact_id,
-        role: contact.role || '',
+        role: contact.role,
         token,
       },
     });
