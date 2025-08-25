@@ -6,7 +6,6 @@ import ResponsiveLayout from '@/components/ResponsiveLayout';
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [projectId, setProjectId] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -17,14 +16,19 @@ export default function Login() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password, project_id: projectId }),
+        body: JSON.stringify({ email, password }),
         credentials: 'include',
       });
       if (!res.ok) {
         throw new Error('Login failed');
       }
-      await res.json();
-      navigate('/projects');
+      const data = await res.json();
+      const projects = Object.keys(data.session?.project_roles || {});
+      if (projects.length === 1) {
+        navigate(`/projects/${projects[0]}`);
+      } else {
+        navigate('/projects');
+      }
     } catch (err) {
       console.error(err);
     }
@@ -55,17 +59,6 @@ export default function Login() {
               className="w-full rounded border p-2"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-            />
-          </label>
-          <label htmlFor="projectId" className="block">
-            <span className="mb-1 block">Project ID</span>
-            <input
-              id="projectId"
-              type="text"
-              placeholder="Project ID"
-              className="w-full rounded border p-2"
-              value={projectId}
-              onChange={(e) => setProjectId(e.target.value)}
             />
           </label>
           <Button className="w-full" type="submit">
