@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import authLogin from './authLogin';
 import authLogout from './authLogout';
+import authRegister from './authRegister';
 import accounts from './accounts';
 import projects from './projects';
 import projectOwner from './projectOwner';
@@ -21,6 +22,7 @@ import { projectAccessMiddleware } from '../middleware/projectAccess';
 const router = Router();
 
 router.use('/auth/login', authLogin);
+router.use('/auth/register', authRegister);
 router.use('/auth/logout', authMiddleware(routePermissions['/auth/logout']), authLogout);
 router.use('/accounts', authMiddleware(routePermissions['/accounts']), accounts);
 router.use('/projects', authMiddleware(routePermissions['/projects']), projects);
