@@ -1,5 +1,6 @@
 import request from 'supertest';
 import bcrypt from 'bcryptjs';
+import { Prisma } from '@prisma/client';
 import app from '../src/index';
 
 jest.mock('../src/db', () => ({
@@ -49,5 +50,22 @@ describe('POST /auth/register', () => {
       .post('/auth/register')
       .send({ email: 'user@example.com', password: 'secret' });
     expect(res.status).toBe(400);
+  });
+
+  it('returns 409 when email already exists', async () => {
+    (prisma.account.create as jest.Mock).mockResolvedValue({ account_id: 'acc1' });
+    (prisma.accountUser.create as jest.Mock).mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+        code: 'P2002',
+        clientVersion: '6.14.0',
+      }),
+    );
+
+    const res = await request(app)
+      .post('/auth/register')
+      .send({ account_name: 'Acme', email: 'user@example.com', password: 'secret' });
+
+    expect(res.status).toBe(409);
+    expect(res.body).toEqual({ error: { message: 'Email already registered' } });
   });
 });
