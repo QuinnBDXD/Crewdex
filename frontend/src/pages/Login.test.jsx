@@ -9,6 +9,10 @@ jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
 }));
 
+beforeEach(() => {
+  mockNavigate.mockReset();
+});
+
 test('redirects to project dashboard when only one project is returned', async () => {
   global.fetch = jest.fn().mockResolvedValue({
     ok: true,
@@ -54,4 +58,21 @@ test('redirects to project list when multiple projects are returned', async () =
   await waitFor(() =>
     expect(mockNavigate).toHaveBeenCalledWith('/projects'),
   );
+});
+
+test('shows an error message when login fails', async () => {
+  global.fetch = jest.fn().mockResolvedValue({
+    ok: false,
+    text: async () => 'Invalid credentials',
+  });
+  render(
+    <MemoryRouter>
+      <Login />
+    </MemoryRouter>,
+  );
+  await userEvent.type(screen.getByLabelText(/Email/i), 'a@b.com');
+  await userEvent.type(screen.getByLabelText(/Password/i), 'secret');
+  await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
+  expect(await screen.findByText('Invalid credentials')).toBeInTheDocument();
+  expect(mockNavigate).not.toHaveBeenCalled();
 });
