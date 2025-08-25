@@ -38,7 +38,8 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: /\/api\//,
+            urlPattern: ({ url }) =>
+              url.pathname.startsWith('/auth') || url.pathname.startsWith('/projects'),
             handler: 'NetworkFirst',
             options: { cacheName: 'api-cache' },
           },
