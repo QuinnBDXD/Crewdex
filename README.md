@@ -11,7 +11,10 @@ pnpm install
 pnpm dev
 ```
 
-The `pnpm dev` script launches the backend API and the frontend client concurrently.
+The `pnpm dev` script launches the backend API and the frontend client concurrently. The backend requires a
+`JWT_SECRET` environment variable, which the script sets to `dev-secret` for convenience. If the frontend runs on a
+different port, configure your dev server to proxy API requests (e.g. `/auth/*` and `/projects`) to the backend
+(`http://localhost:3000`).
 
 The backend server listens on port `3000` by default. Set the `PORT` environment variable to override this value.
 

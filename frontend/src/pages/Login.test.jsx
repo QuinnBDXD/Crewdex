@@ -28,8 +28,8 @@ test('redirects to project dashboard when only one project is returned', async (
   await userEvent.type(screen.getByLabelText(/Email/i), 'a@b.com');
   await userEvent.type(screen.getByLabelText(/Password/i), 'secret');
   await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
-  expect(fetch).toHaveBeenCalledWith(
-    '/api/auth/login',
+    expect(fetch).toHaveBeenCalledWith(
+      '/auth/login',
     expect.objectContaining({
       method: 'POST',
       body: JSON.stringify({ email: 'a@b.com', password: 'secret' }),
