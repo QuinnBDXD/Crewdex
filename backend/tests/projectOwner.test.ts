@@ -14,7 +14,12 @@ jest.mock('../src/db', () => ({
 import app from '../src/index';
 
 const token = jwt.sign(
-  { account_id: 'acc', role: 'AccountAdmin', project_contact_id: 'pc1' },
+  {
+    account_id: 'acc',
+    role: 'AccountAdmin',
+    project_contact_id: 'pc1',
+    project_roles: { p1: 'ProjectOwner' },
+  },
   'test-secret',
 );
 

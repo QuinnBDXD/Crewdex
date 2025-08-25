@@ -48,10 +48,12 @@ router.post(
       accesses.forEach((a: { project_id: string; role: string }) => {
         project_roles[a.project_id] = a.role;
       });
+      const role = user.role || 'AccountAdmin';
       const token = jwt.sign(
         {
           account_id: user.account_id,
           user_id: user.user_id,
+          role,
           project_roles,
         },
         JWT_SECRET,
@@ -67,6 +69,7 @@ router.post(
         session: {
           account_id: user.account_id,
           user_id: user.user_id,
+          role,
           project_roles,
         },
       });
