@@ -24,6 +24,10 @@ export function errorHandler(
     status = err.status || 500;
     message = err.message || message;
     details = err.details;
+  } else if (typeof err === 'object' && err !== null && 'status' in err) {
+    status = (err as any).status || status;
+    message = (err as any).message || message;
+    details = (err as any).details;
   } else {
     // Log unexpected errors to aid debugging
     console.error(err);

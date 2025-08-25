@@ -3,6 +3,7 @@ import { z } from 'zod';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../db';
+import { Prisma } from '@prisma/client';
 import { HttpError } from '../middleware/errorHandler';
 import { validate } from '../middleware/validate';
 
@@ -62,6 +63,12 @@ router.post(
         },
       });
     } catch (err) {
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === 'P2002'
+      ) {
+        return next(new HttpError(409, 'Email already registered'));
+      }
       return next(new HttpError(500, 'Registration failed'));
     }
   },
