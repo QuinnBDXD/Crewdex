@@ -22,7 +22,8 @@ export default function Register() {
         throw new Error('Registration failed');
       }
       await res.json();
-      navigate('/projects');
+      alert('Registration successful. Please log in.');
+      navigate('/');
     } catch (err) {
       console.error(err);
     }
