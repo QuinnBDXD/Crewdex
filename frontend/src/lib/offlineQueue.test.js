@@ -79,3 +79,19 @@ test('flushQueue requeues failed requests with retry metadata', async () => {
   expect(requests[0].retryCount).toBe(1);
   expect(typeof requests[0].nextRetryAt).toBe('number');
 });
+
+test('flushQueue drops requests after exceeding max retries', async () => {
+  await addRequest({
+    url: '/fail',
+    method: 'POST',
+    headers: {},
+    body: '{}',
+    retryCount: 5,
+  });
+  global.fetch = jest
+    .fn()
+    .mockResolvedValue({ ok: false, status: 500, statusText: 'Error' });
+  await flushQueue();
+  const requests = await getAllRequests();
+  expect(requests).toHaveLength(0);
+});
