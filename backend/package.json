@@ -4,12 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "JWT_SECRET=dev-secret npx ts-node src/index.ts",
+    "dev": "cross-env JWT_SECRET=dev-secret ts-node src/index.ts",
     "build": "tsc",
-    "start": "JWT_SECRET=dev-secret node dist/index.js",
+    "start": "cross-env JWT_SECRET=dev-secret node dist/index.js",
     "db:migrate": "prisma migrate deploy",
     "db:seed": "prisma db seed",
-    "test": "JWT_SECRET=test-secret npx jest"
+    "test": "cross-env JWT_SECRET=test-secret jest"
   },
   "keywords": [],
   "author": "",
@@ -35,6 +35,7 @@
     "supertest": "^6.3.4",
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "cross-env": "^7.0.3"
   }
 }
