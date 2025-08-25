@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "cross-env JWT_SECRET=dev-secret ts-node src/index.ts",
+    "dev": "cross-env JWT_SECRET=dev-secret ts-node src/server.ts",
     "build": "tsc",
-    "start": "cross-env JWT_SECRET=dev-secret node dist/index.js",
+    "start": "cross-env JWT_SECRET=dev-secret node dist/server.js",
     "db:migrate": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "test": "cross-env JWT_SECRET=test-secret jest",

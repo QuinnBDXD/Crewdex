@@ -13,6 +13,8 @@ pnpm dev
 
 The `pnpm dev` script launches the backend API and the frontend client concurrently.
 
+The backend server listens on port `3000` by default. Set the `PORT` environment variable to override this value.
+
 ## User Registration
 
 New accounts are created through the registration endpoint. Send a `POST` request to `/auth/register` with:
