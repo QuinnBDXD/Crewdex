@@ -9,6 +9,9 @@ const manifest = JSON.parse(
 );
 
 export default defineConfig({
+  server: {
+    proxy: { '/api': { target: 'http://localhost:3000', changeOrigin: true } },
+  },
   plugins: [
     react(),
     VitePWA({
@@ -39,7 +42,7 @@ export default defineConfig({
           },
           {
             urlPattern: ({ url }) =>
-              url.pathname.startsWith('/auth') || url.pathname.startsWith('/projects'),
+              url.pathname.startsWith('/api/auth') || url.pathname.startsWith('/projects'),
             handler: 'NetworkFirst',
             options: { cacheName: 'api-cache' },
           },
