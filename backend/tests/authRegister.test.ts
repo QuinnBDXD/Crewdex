@@ -37,7 +37,7 @@ describe('POST /auth/register', () => {
     expect(res.headers['set-cookie']).toBeDefined();
     expect(res.body.session).toEqual({
       account_id: 'acc1',
-      account_user_id: 'user1',
+      user_id: 'user1',
       project_contact_id: null,
       role: 'AccountAdmin',
       project_roles: {},

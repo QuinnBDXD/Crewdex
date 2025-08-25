@@ -38,7 +38,7 @@ router.post(
       const token = jwt.sign(
         {
           account_id: account.account_id,
-          account_user_id: user.user_id,
+          user_id: user.user_id,
           project_contact_id: user.project_contact_id,
           role: 'AccountAdmin',
           project_roles: {},
@@ -55,7 +55,7 @@ router.post(
       return res.json({
         session: {
           account_id: account.account_id,
-          account_user_id: user.user_id,
+          user_id: user.user_id,
           project_contact_id: user.project_contact_id,
           role: 'AccountAdmin',
           project_roles: {},
