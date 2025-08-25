@@ -76,4 +76,24 @@ describe('POST /auth/login', () => {
 
     expect(res.status).toBe(401);
   });
+
+  it('rejects missing fields', async () => {
+    const res = await request(app)
+      .post('/auth/login')
+      .send({ email: 'user@example.com', project_id: 'proj1' });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('rejects invalid email format', async () => {
+    const res = await request(app)
+      .post('/auth/login')
+      .send({
+        email: 'not-an-email',
+        password: 'secret',
+        project_id: 'proj1',
+      });
+
+    expect(res.status).toBe(400);
+  });
 });
