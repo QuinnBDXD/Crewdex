@@ -11,36 +11,36 @@ enum UserRoleName {
   ACCOUNT_ADMIN @map("AccountAdmin")
   PROJECT_OWNER @map("ProjectOwner")
   PROJECT_ADMIN @map("ProjectAdmin")
-  VIEWER @map("Viewer")
+  VIEWER        @map("Viewer")
 }
 
 enum ProjectContactVisibility {
-  PUBLIC @map("public")
+  PUBLIC   @map("public")
   INTERNAL @map("internal")
 }
 
 enum FlagKind {
   ON_SITE @map("On Site")
   QUALITY @map("Quality")
-  SAFETY @map("Safety")
+  SAFETY  @map("Safety")
   LAGGING @map("Lagging")
 }
 
 enum FlagDate {
-  TODAY @map("Today")
+  TODAY      @map("Today")
   ENTER_DATE @map("Enter Date")
 }
 
 enum ReportTemplateExport {
-  PDF @map("pdf")
+  PDF  @map("pdf")
   HTML @map("html")
 }
 
 enum ReportType {
-  DAILY @map("Daily")
+  DAILY    @map("Daily")
   INCIDENT @map("Incident")
-  SAFETY @map("Safety")
-  CUSTOM @map("Custom")
+  SAFETY   @map("Safety")
+  CUSTOM   @map("Custom")
 }
 
 enum ReportStatus {
@@ -49,26 +49,26 @@ enum ReportStatus {
 }
 
 enum PunchItemStatus {
-  OPEN @map("open")
+  OPEN        @map("open")
   IN_PROGRESS @map("in_progress")
-  COMPLETE @map("complete")
+  COMPLETE    @map("complete")
 }
 
 enum ChangeOrderStatus {
-  OPEN @map("open")
+  OPEN     @map("open")
   APPROVED @map("approved")
   REJECTED @map("rejected")
 }
 
 enum ChangeOrderOrigin {
-  RFI @map("rfi")
+  RFI   @map("rfi")
   OWNER @map("owner")
   FIELD @map("field")
 }
 
 enum ExternalLinkVisibility {
   PUBLIC @map("public")
-  ADMIN @map("admin")
+  ADMIN  @map("admin")
 }
 
 enum ExternalLinkKind {
@@ -79,23 +79,23 @@ enum ExternalLinkKind {
 
 enum SubscriptionChannel {
   EMAIL @map("email")
-  SMS @map("sms")
+  SMS   @map("sms")
 }
 
 enum SubscriptionFrequency {
   INSTANT @map("instant")
-  DAILY @map("daily")
-  WEEKLY @map("weekly")
+  DAILY   @map("daily")
+  WEEKLY  @map("weekly")
 }
 
 enum AccessRequestStatus {
-  PENDING @map("pending")
+  PENDING  @map("pending")
   APPROVED @map("approved")
-  DENIED @map("denied")
+  DENIED   @map("denied")
 }
 
 enum ProjectAccessRole {
-  VIEWER @map("Viewer")
+  VIEWER        @map("Viewer")
   PROJECT_ADMIN @map("ProjectAdmin")
   PROJECT_OWNER @map("ProjectOwner")
 }
@@ -105,13 +105,28 @@ enum ShareLinkScope {
 }
 
 model Account {
-  account_id String   @id @default(uuid())
+  account_id String        @id @default(uuid())
   name       String
   created_at DateTime?
+  users      AccountUser[]
+}
+
+model AccountUser {
+  user_id            String   @id @default(uuid())
+  account_id         String
+  email              String   @unique
+  password_hash      String
+  created_at         DateTime @default(now())
+  project_contact_id String?
+
+  account         Account         @relation(fields: [account_id], references: [account_id])
+  project_contact ProjectContact? @relation("AccountUserProjectContact", fields: [project_contact_id], references: [project_contact_id])
+
+  @@index([account_id])
 }
 
 model UserRole {
-  role_id     String        @id @default(uuid())
+  role_id     String       @id @default(uuid())
   name        UserRoleName
   permissions String[]
   account_id  String
@@ -120,7 +135,7 @@ model UserRole {
 }
 
 model Project {
-  project_id    String   @id @default(uuid())
+  project_id    String    @id @default(uuid())
   name          String
   number        String?
   client        String?
@@ -135,7 +150,7 @@ model Project {
 }
 
 model ProjectContact {
-  project_contact_id String   @id @default(uuid())
+  project_contact_id String                   @id @default(uuid())
   project_id         String
   name               String
   email              String
@@ -145,6 +160,7 @@ model ProjectContact {
   role               String?
   visibility         ProjectContactVisibility @default(PUBLIC)
   account_id         String
+  account_users      AccountUser[]            @relation("AccountUserProjectContact")
 
   @@unique([project_id, email])
   @@index([account_id])
@@ -185,7 +201,7 @@ model ProjectContactScopeLink {
 }
 
 model Flag {
-  flag_id            String   @id @default(uuid())
+  flag_id            String    @id @default(uuid())
   project_id         String
   project_contact_id String?
   kind               FlagKind
@@ -212,20 +228,20 @@ model FlagPhotoLink {
 }
 
 model ReportTemplate {
-  template_id   String   @id @default(uuid())
-  project_id    String
-  name          String
-  filter        Json?
+  template_id    String                @id @default(uuid())
+  project_id     String
+  name           String
+  filter         Json?
   layout_options Json?
-  export        ReportTemplateExport?
-  account_id    String
+  export         ReportTemplateExport?
+  account_id     String
 
   @@index([account_id])
   @@index([project_id])
 }
 
 model Report {
-  report_id                 String   @id @default(uuid())
+  report_id                 String       @id @default(uuid())
   project_id                String
   reporttype                ReportType
   title                     String?
@@ -261,7 +277,7 @@ model ReportPhotoLink {
 }
 
 model RFI {
-  rfi_id                       String   @id @default(uuid())
+  rfi_id                       String    @id @default(uuid())
   project_id                   String
   subject                      String
   question                     String?
@@ -284,20 +300,20 @@ model RFIPhotoLink {
 }
 
 model Submittal {
-  submittal_id                  String   @id @default(uuid())
-  project_id                    String
-  spec_ref                      String?
-  title                         String?
+  submittal_id                    String    @id @default(uuid())
+  project_id                      String
+  spec_ref                        String?
+  title                           String?
   submitted_by_project_contact_id String?
-  created_at                    DateTime?
-  account_id                    String
+  created_at                      DateTime?
+  account_id                      String
 
   @@index([account_id])
   @@index([project_id])
 }
 
 model SubmittalPhotoLink {
-  id          String @id @default(uuid())
+  id           String @id @default(uuid())
   submittal_id String
   photo_id     String
   account_id   String
@@ -307,14 +323,14 @@ model SubmittalPhotoLink {
 }
 
 model PunchItem {
-  punch_id                   String   @id @default(uuid())
-  project_id                 String
-  location                   String?
-  description                String
-  status                     PunchItemStatus @default(OPEN)
+  punch_id                       String          @id @default(uuid())
+  project_id                     String
+  location                       String?
+  description                    String
+  status                         PunchItemStatus @default(OPEN)
   assigned_to_project_contact_id String?
-  created_at                 DateTime?
-  account_id                 String
+  created_at                     DateTime?
+  account_id                     String
 
   @@index([account_id])
   @@index([project_id])
@@ -331,10 +347,10 @@ model PunchPhotoLink {
 }
 
 model ChangeOrder {
-  co_id      String   @id @default(uuid())
+  co_id      String             @id @default(uuid())
   project_id String
   title      String?
-  status     ChangeOrderStatus @default(OPEN)
+  status     ChangeOrderStatus  @default(OPEN)
   origin     ChangeOrderOrigin?
   amount     Float?
   created_at DateTime?
@@ -355,7 +371,7 @@ model ChangeOrderPhotoLink {
 }
 
 model ScheduleItem {
-  schedule_id        String   @id @default(uuid())
+  schedule_id        String  @id @default(uuid())
   project_id         String
   week               String
   label              String
@@ -372,13 +388,13 @@ model ScheduleItem {
 }
 
 model Photo {
-  photo_id  String   @id @default(uuid())
+  photo_id   String    @id @default(uuid())
   project_id String
-  taken_at  DateTime?
-  week      String?
-  caption   String?
-  url       String
-  tags      String[]
+  taken_at   DateTime?
+  week       String?
+  caption    String?
+  url        String
+  tags       String[]
   account_id String
 
   @@index([account_id])
@@ -387,12 +403,12 @@ model Photo {
 }
 
 model ExternalLink {
-  link_id    String   @id @default(uuid())
+  link_id    String                 @id @default(uuid())
   project_id String
   label      String
   url        String
   visibility ExternalLinkVisibility @default(PUBLIC)
-  kind       ExternalLinkKind @default(PLANS)
+  kind       ExternalLinkKind       @default(PLANS)
   account_id String
 
   @@index([account_id])
@@ -400,11 +416,11 @@ model ExternalLink {
 }
 
 model Subscription {
-  subscription_id String   @id @default(uuid())
+  subscription_id String                @id @default(uuid())
   project_id      String
   subscriber      String
   events          String[]
-  channel         SubscriptionChannel @default(EMAIL)
+  channel         SubscriptionChannel   @default(EMAIL)
   frequency       SubscriptionFrequency @default(INSTANT)
   account_id      String
 
@@ -413,15 +429,15 @@ model Subscription {
 }
 
 model NotificationEvent {
-  event_id    String   @id @default(uuid())
-  type        String
-  project_id  String
-  entity_type String?
-  entity_id   String?
-  payload     Json?
-  created_at  DateTime?
+  event_id     String    @id @default(uuid())
+  type         String
+  project_id   String
+  entity_type  String?
+  entity_id    String?
+  payload      Json?
+  created_at   DateTime?
   delivered_to String[]
-  account_id  String
+  account_id   String
 
   @@index([account_id])
   @@index([project_id])
@@ -442,32 +458,32 @@ model AuditEvent {
 }
 
 model AccessRequest {
-  access_request_id            String   @id @default(uuid())
-  project_id                   String
-  email_or_phone               String
-  status                       AccessRequestStatus @default(PENDING)
-  requested_at                 DateTime?
+  access_request_id             String              @id @default(uuid())
+  project_id                    String
+  email_or_phone                String
+  status                        AccessRequestStatus @default(PENDING)
+  requested_at                  DateTime?
   decided_by_project_contact_id String?
-  decision_note                String?
-  account_id                   String
+  decision_note                 String?
+  account_id                    String
 
   @@index([account_id])
   @@index([project_id])
 }
 
 model ProjectAccess {
-  project_access_id String   @id @default(uuid())
-  project_id        String
+  project_access_id  String            @id @default(uuid())
+  project_id         String
   project_contact_id String
-  role              ProjectAccessRole @default(VIEWER)
-  account_id        String
+  role               ProjectAccessRole @default(VIEWER)
+  account_id         String
 
   @@index([account_id])
   @@index([project_id])
 }
 
 model ShareLink {
-  sharelink_id String   @id @default(uuid())
+  sharelink_id String         @id @default(uuid())
   project_id   String
   token        String
   scope        ShareLinkScope @default(VIEW)
@@ -478,4 +494,3 @@ model ShareLink {
   @@index([account_id])
   @@index([project_id])
 }
-

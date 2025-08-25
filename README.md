@@ -13,6 +13,20 @@ pnpm dev
 
 The `pnpm dev` script launches the backend API and the frontend client concurrently.
 
+## User Registration
+
+New accounts are created through the registration endpoint. Send a `POST` request to `/auth/register` with:
+
+```json
+{
+  "account_name": "My Company",
+  "email": "admin@example.com",
+  "password": "plain-text password"
+}
+```
+
+The server creates the account, stores a bcrypt password hash, and responds with a session token (JWT) in an HTTP-only cookie.
+
 ## Authentication and RBAC
 
 Users authenticate with email, password, and a project ID. Passwords are stored as hashes and verified using `bcrypt.compare`. Successful login issues a JWT containing:

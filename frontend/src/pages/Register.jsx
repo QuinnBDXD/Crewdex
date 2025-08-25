@@ -3,25 +3,23 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import ResponsiveLayout from '@/components/ResponsiveLayout';
 
-export default function Login() {
+export default function Register() {
+  const [accountName, setAccountName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [projectId, setProjectId] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch('/api/auth/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password, project_id: projectId }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ account_name: accountName, email, password }),
         credentials: 'include',
       });
       if (!res.ok) {
-        throw new Error('Login failed');
+        throw new Error('Registration failed');
       }
       await res.json();
       navigate('/projects');
@@ -34,13 +32,22 @@ export default function Login() {
     <ResponsiveLayout>
       <div className="flex min-h-screen items-center justify-center">
         <form className="w-full max-w-sm space-y-4" onSubmit={handleSubmit}>
-          <h1 className="text-center text-2xl font-bold">Login</h1>
+          <h1 className="text-center text-2xl font-bold">Register</h1>
+          <label htmlFor="accountName" className="block">
+            <span className="mb-1 block">Account Name</span>
+            <input
+              id="accountName"
+              type="text"
+              className="w-full rounded border p-2"
+              value={accountName}
+              onChange={(e) => setAccountName(e.target.value)}
+            />
+          </label>
           <label htmlFor="email" className="block">
             <span className="mb-1 block">Email</span>
             <input
               id="email"
               type="email"
-              placeholder="Email"
               className="w-full rounded border p-2"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -51,28 +58,16 @@ export default function Login() {
             <input
               id="password"
               type="password"
-              placeholder="Password"
               className="w-full rounded border p-2"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </label>
-          <label htmlFor="projectId" className="block">
-            <span className="mb-1 block">Project ID</span>
-            <input
-              id="projectId"
-              type="text"
-              placeholder="Project ID"
-              className="w-full rounded border p-2"
-              value={projectId}
-              onChange={(e) => setProjectId(e.target.value)}
-            />
-          </label>
           <Button className="w-full" type="submit">
-            Sign In
+            Create Account
           </Button>
           <p className="text-center text-sm">
-            Need an account? <Link to="/register">Register</Link>
+            Already have an account? <Link to="/">Login</Link>
           </p>
         </form>
       </div>
