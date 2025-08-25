@@ -9,7 +9,8 @@
     "start": "cross-env JWT_SECRET=dev-secret node dist/index.js",
     "db:migrate": "prisma migrate deploy",
     "db:seed": "prisma db seed",
-    "test": "cross-env JWT_SECRET=test-secret jest"
+    "test": "cross-env JWT_SECRET=test-secret jest",
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",
