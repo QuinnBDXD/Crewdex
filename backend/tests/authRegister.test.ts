@@ -12,7 +12,7 @@ jest.mock('../src/db', () => ({
 
 const { prisma } = require('../src/db');
 
-describe('POST /auth/register', () => {
+describe('POST /api/auth/register', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -28,7 +28,7 @@ describe('POST /auth/register', () => {
     }));
 
     const res = await request(app)
-      .post('/auth/register')
+      .post('/api/auth/register')
       .send({ account_name: 'Acme', email: 'user@example.com', password: 'secret' });
 
     expect(res.status).toBe(200);
@@ -47,7 +47,7 @@ describe('POST /auth/register', () => {
 
   it('rejects missing fields', async () => {
     const res = await request(app)
-      .post('/auth/register')
+      .post('/api/auth/register')
       .send({ email: 'user@example.com', password: 'secret' });
     expect(res.status).toBe(400);
   });
@@ -62,7 +62,7 @@ describe('POST /auth/register', () => {
     );
 
     const res = await request(app)
-      .post('/auth/register')
+      .post('/api/auth/register')
       .send({ account_name: 'Acme', email: 'user@example.com', password: 'secret' });
 
     expect(res.status).toBe(409);
