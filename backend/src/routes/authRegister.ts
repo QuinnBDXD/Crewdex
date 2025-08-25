@@ -63,6 +63,10 @@ router.post(
         },
       });
     } catch (err) {
+      console.error(err);
+      if (err instanceof Prisma.PrismaClientInitializationError) {
+        return next(new HttpError(503, 'Database unavailable'));
+      }
       if (
         err instanceof Prisma.PrismaClientKnownRequestError &&
         err.code === 'P2002'
