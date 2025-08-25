@@ -5,7 +5,10 @@ import { prisma } from '../db';
 import { HttpError } from '../middleware/errorHandler';
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is not set');
+}
 
 router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   const { email, password, project_id } = req.body || {};
