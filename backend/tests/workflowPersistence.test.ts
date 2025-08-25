@@ -1,11 +1,35 @@
-import { execSync } from 'child_process'
-process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/crewdex_test'
+process.env.DATABASE_URL = 'file:memorydb?mode=memory&cache=shared'
 
 const { prisma } = require('../src/db')
 const { runWorkflow } = require('../src/workflows/engine')
 
-beforeAll(() => {
-  execSync('npx prisma migrate deploy', { cwd: __dirname + '/..', stdio: 'inherit', env: process.env })
+beforeAll(async () => {
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS "NotificationEvent" (
+      "event_id" TEXT PRIMARY KEY,
+      "type" TEXT NOT NULL,
+      "project_id" TEXT NOT NULL,
+      "entity_type" TEXT,
+      "entity_id" TEXT,
+      "payload" TEXT,
+      "created_at" DATETIME DEFAULT CURRENT_TIMESTAMP,
+      "delivered_to" TEXT,
+      "account_id" TEXT NOT NULL
+    );
+  `)
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS "AuditEvent" (
+      "event_id" TEXT PRIMARY KEY,
+      "actor" TEXT NOT NULL,
+      "action" TEXT NOT NULL,
+      "entity" TEXT NOT NULL,
+      "entity_id" TEXT NOT NULL,
+      "before" TEXT,
+      "after" TEXT,
+      "at" DATETIME DEFAULT CURRENT_TIMESTAMP,
+      "account_id" TEXT NOT NULL
+    );
+  `)
 })
 
 afterEach(async () => {
