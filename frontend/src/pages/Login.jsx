@@ -6,10 +6,12 @@ import ResponsiveLayout from '@/components/ResponsiveLayout';
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
@@ -20,7 +22,9 @@ export default function Login() {
         credentials: 'include',
       });
       if (!res.ok) {
-        throw new Error('Login failed');
+        const message = await res.text();
+        setError(message || 'Login failed');
+        return;
       }
       const data = await res.json();
       const projects = Object.keys(data.session?.project_roles || {});
@@ -30,6 +34,7 @@ export default function Login() {
         navigate('/projects');
       }
     } catch (err) {
+      setError(err.message || 'Login failed');
       console.error(err);
     }
   };
@@ -37,8 +42,12 @@ export default function Login() {
   return (
     <ResponsiveLayout>
       <div className="flex min-h-screen items-center justify-center">
-        <form className="w-full max-w-sm space-y-4" onSubmit={handleSubmit}>
-          <h1 className="text-center text-2xl font-bold">Login</h1>
+        <div className="w-full max-w-sm">
+          {error && (
+            <p className="mb-4 text-center text-sm text-red-600">{error}</p>
+          )}
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <h1 className="text-center text-2xl font-bold">Login</h1>
           <label htmlFor="email" className="block">
             <span className="mb-1 block">Email</span>
             <input
@@ -50,24 +59,25 @@ export default function Login() {
               onChange={(e) => setEmail(e.target.value)}
             />
           </label>
-          <label htmlFor="password" className="block">
-            <span className="mb-1 block">Password</span>
-            <input
-              id="password"
-              type="password"
-              placeholder="Password"
-              className="w-full rounded border p-2"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </label>
-          <Button className="w-full" type="submit">
-            Sign In
-          </Button>
-          <p className="text-center text-sm">
-            Need an account? <Link to="/register">Register</Link>
-          </p>
-        </form>
+            <label htmlFor="password" className="block">
+              <span className="mb-1 block">Password</span>
+              <input
+                id="password"
+                type="password"
+                placeholder="Password"
+                className="w-full rounded border p-2"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </label>
+            <Button className="w-full" type="submit">
+              Sign In
+            </Button>
+            <p className="text-center text-sm">
+              Need an account? <Link to="/register">Register</Link>
+            </p>
+          </form>
+        </div>
       </div>
     </ResponsiveLayout>
   );
