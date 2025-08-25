@@ -21,7 +21,7 @@ beforeEach(() => {
   findManyMock.mockReset();
 });
 
-describe('POST /projects', () => {
+describe('POST /api/projects', () => {
   it('persists account_id for tenant isolation', async () => {
     createMock.mockResolvedValue({ project_id: 'p1', account_id: 'acc' });
     const payload = {
@@ -32,7 +32,7 @@ describe('POST /projects', () => {
       creator_email: 'alice@example.com',
     };
     const res = await request(app)
-      .post('/projects')
+      .post('/api/projects')
       .set('Authorization', `Bearer ${token}`)
       .send(payload);
     expect(res.status).toBe(200);
@@ -43,7 +43,7 @@ describe('POST /projects', () => {
 
   it('returns 400 on invalid payload', async () => {
     const res = await request(app)
-      .post('/projects')
+      .post('/api/projects')
       .set('Authorization', `Bearer ${token}`)
       .send({
         name: 'Project',
@@ -55,13 +55,13 @@ describe('POST /projects', () => {
   });
 });
 
-describe('GET /projects', () => {
+describe('GET /api/projects', () => {
   it('filters projects by account_id', async () => {
     findManyMock.mockResolvedValue([
       { project_id: 'p1', name: 'Proj', account_id: 'acc' },
     ]);
     const res = await request(app)
-      .get('/projects')
+      .get('/api/projects')
       .set('Authorization', `Bearer ${token}`);
     expect(res.status).toBe(200);
     expect(findManyMock).toHaveBeenCalledWith({

@@ -27,7 +27,7 @@ beforeEach(() => {
   upsertMock.mockReset();
 });
 
-describe('POST /projects/:project_id/owner', () => {
+describe('POST /api/projects/:project_id/owner', () => {
   it('assigns project owner and scopes by account', async () => {
     upsertMock.mockResolvedValue({
       project_access_id: 'p1',
@@ -37,7 +37,7 @@ describe('POST /projects/:project_id/owner', () => {
       account_id: 'acc',
     });
     const res = await request(app)
-      .post('/projects/p1/owner')
+      .post('/api/projects/p1/owner')
       .set('Authorization', `Bearer ${token}`)
       .send({ project_contact_id: 'pc2' });
     expect(res.status).toBe(200);
@@ -68,7 +68,7 @@ describe('POST /projects/:project_id/owner', () => {
 
   it('returns 400 when project_contact_id missing', async () => {
     const res = await request(app)
-      .post('/projects/p1/owner')
+      .post('/api/projects/p1/owner')
       .set('Authorization', `Bearer ${token}`)
       .send({});
     expect(res.status).toBe(400);

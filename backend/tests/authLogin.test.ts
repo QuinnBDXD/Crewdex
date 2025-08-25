@@ -12,7 +12,7 @@ jest.mock('../src/db', () => ({
 
 const { prisma } = require('../src/db');
 
-describe('POST /auth/login', () => {
+describe('POST /api/auth/login', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -33,7 +33,7 @@ describe('POST /auth/login', () => {
     ]);
 
     const res = await request(app)
-      .post('/auth/login')
+      .post('/api/auth/login')
       .send({ email: 'user@example.com', password });
 
     expect(res.status).toBe(200);
@@ -54,7 +54,7 @@ describe('POST /auth/login', () => {
       password_hash: hash,
     });
     const res = await request(app)
-      .post('/auth/login')
+      .post('/api/auth/login')
       .send({ email: 'user@example.com', password: 'wrong' });
     expect(res.status).toBe(401);
   });
@@ -62,21 +62,21 @@ describe('POST /auth/login', () => {
   it('rejects unknown user', async () => {
     (prisma.accountUser.findUnique as jest.Mock).mockResolvedValue(null);
     const res = await request(app)
-      .post('/auth/login')
+      .post('/api/auth/login')
       .send({ email: 'user@example.com', password: 'secret' });
     expect(res.status).toBe(401);
   });
 
   it('rejects missing fields', async () => {
     const res = await request(app)
-      .post('/auth/login')
+      .post('/api/auth/login')
       .send({ email: 'user@example.com' });
     expect(res.status).toBe(400);
   });
 
   it('rejects invalid email format', async () => {
     const res = await request(app)
-      .post('/auth/login')
+      .post('/api/auth/login')
       .send({ email: 'not-an-email', password: 'secret' });
     expect(res.status).toBe(400);
   });

@@ -10,8 +10,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Mount application routes
-app.use('/', routes);
+// Mount application routes under a consistent API prefix
+app.use('/api', routes);
 
 // Centralized error handler ensures consistent error responses
 app.use(errorHandler);

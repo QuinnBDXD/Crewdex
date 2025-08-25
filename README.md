@@ -17,7 +17,7 @@ The backend server listens on port `3000` by default. Set the `PORT` environment
 
 ## User Registration
 
-New accounts are created through the registration endpoint. Send a `POST` request to `/auth/register` with:
+New accounts are created through the registration endpoint. Send a `POST` request to `/api/auth/register` with:
 
 ```json
 {
@@ -37,7 +37,7 @@ Users authenticate with email and password against an account-wide user table. P
 - `user_id`
 - `project_roles` – mapping of project IDs to the user's role
 
-The login request must include the following JSON body:
+Send a `POST` request to `/api/auth/login` with the following JSON body:
 
 ```json
 {

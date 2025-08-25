@@ -27,7 +27,7 @@ beforeEach(() => {
   createMock.mockReset();
 });
 
-describe('POST /projects/:project_id/contacts', () => {
+describe('POST /api/projects/:project_id/contacts', () => {
   it('persists contact with account and project scoping', async () => {
     createMock.mockResolvedValue({
       project_contact_id: 'pc2',
@@ -38,7 +38,7 @@ describe('POST /projects/:project_id/contacts', () => {
     });
     const payload = { name: 'Bob', email: 'bob@example.com' };
     const res = await request(app)
-      .post('/projects/p1/contacts')
+      .post('/api/projects/p1/contacts')
       .set('Authorization', `Bearer ${token}`)
       .send(payload);
     expect(res.status).toBe(200);
@@ -56,7 +56,7 @@ describe('POST /projects/:project_id/contacts', () => {
 
   it('returns 400 on invalid payload', async () => {
     const res = await request(app)
-      .post('/projects/p1/contacts')
+      .post('/api/projects/p1/contacts')
       .set('Authorization', `Bearer ${token}`)
       .send({ name: 'Bob' });
     expect(res.status).toBe(400);
