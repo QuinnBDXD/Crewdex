@@ -1,12 +1,47 @@
-# React + Vite
+# Crewdex Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The frontend is a React application built with Vite and configured as a Progressive Web App (PWA).
 
-Currently, two official plugins are available:
+## Setup
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. Install workspace dependencies:
+   
+   ```bash
+   pnpm install
+   ```
 
-## Expanding the ESLint configuration
+2. Start the development servers:
+   
+   ```bash
+   pnpm dev
+   ```
+   
+   This command runs both the backend API and the frontend client. To launch only the frontend, run:
+   
+   ```bash
+   pnpm --filter frontend dev
+   ```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+3. Build the frontend for production:
+   
+   ```bash
+   pnpm --filter frontend build
+   ```
+
+## Authentication & Multi-Tenancy
+
+Crewdex uses JSON Web Tokens to authenticate users and scope data to each account. Every session token embeds `account_id`, `project_contact_id`, and `role` so the UI only shows data for the current tenant.
+
+## PWA Installation
+
+Crewdex can be installed on desktop and mobile:
+
+1. Open the app in a supported browser.
+2. Click the **Install Crewdex** button in the header or choose the browser's **Install / Add to Home Screen** option.
+3. Launch Crewdex from the installed icon. When a new version is available, the service worker prompts for an update.
+
+## Offline Behavior
+
+- The service worker caches the application shell and previously visited pages.
+- Requests made while offline are queued in IndexedDB and retried automatically when connectivity returns.
+- Network errors show an offline badge in the header along with the number of queued actions.
