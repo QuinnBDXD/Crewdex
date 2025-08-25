@@ -17,6 +17,7 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     const { project_id } = req.params;
     const { user } = req as AuthenticatedRequest;
+    const account_id = user?.account_id as string;
     if (!project_id) {
       return next(new HttpError(400, 'project_id required'));
     }
@@ -27,7 +28,7 @@ router.post(
         update: {
           project_contact_id,
           role: 'ProjectOwner' as any,
-          account_id: user?.account_id,
+          account_id,
           project_id,
         },
         create: {
@@ -35,7 +36,7 @@ router.post(
           project_id,
           project_contact_id,
           role: 'ProjectOwner' as any,
-          account_id: user?.account_id,
+          account_id,
         },
       });
       return res.json(access);

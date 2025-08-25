@@ -26,9 +26,9 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     const { account_name, email, password } = req.body as RegisterPayload;
     try {
-      const account = await prisma.account.create({ data: { name: account_name } });
+      const account = await (prisma as any).account.create({ data: { name: account_name } });
       const password_hash = await bcrypt.hash(password, 10);
-      const user = await prisma.accountUser.create({
+      const user = await (prisma as any).accountUser.create({
         data: {
           account_id: account.account_id,
           email,
