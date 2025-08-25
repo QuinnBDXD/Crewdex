@@ -3,10 +3,13 @@
   "private": true,
   "workspaces": ["backend", "frontend"],
   "scripts": {
-    "dev": "JWT_SECRET=dev-secret npm run dev --workspace backend & npm run dev --workspace frontend",
-    "build": "npm run build --workspace backend && npm run build --workspace frontend",
-    "start": "JWT_SECRET=dev-secret npm run start --workspace backend",
-    "db:migrate": "npm run db:migrate --workspace backend",
-    "db:seed": "npm run db:seed --workspace backend"
+    "dev": "cross-env JWT_SECRET=dev-secret pnpm -r --parallel dev",
+    "build": "pnpm -r build",
+    "start": "cross-env JWT_SECRET=dev-secret pnpm --filter backend start",
+    "db:migrate": "pnpm --filter backend db:migrate",
+    "db:seed": "pnpm --filter backend db:seed"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
   }
 }
