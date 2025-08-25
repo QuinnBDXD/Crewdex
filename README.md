@@ -29,23 +29,22 @@ The server creates the account, stores a bcrypt password hash, and responds with
 
 ## Authentication and RBAC
 
-Users authenticate with email, password, and a project ID. Passwords are stored as hashes and verified using `bcrypt.compare`. Successful login issues a JWT containing:
+Users authenticate with email and password against an account-wide user table. Passwords are stored as hashes and verified using `bcrypt.compare`. Successful login issues a JWT containing:
 
 - `account_id`
-- `project_contact_id`
-- `role`
+- `user_id`
+- `project_roles` – mapping of project IDs to the user's role
 
 The login request must include the following JSON body:
 
 ```json
 {
   "email": "user@example.com",
-  "password": "plain-text password",
-  "project_id": "project identifier"
+  "password": "plain-text password"
 }
 ```
 
-The `project_id` ensures the session is scoped to the selected project.
+After login, the server derives `project_roles` by linking the user to related project contacts and access rights. The client redirects to the first project if only one is available; otherwise it navigates to the project list.
 
 Role-based access control (RBAC) is enforced on every route. Supported roles include:
 

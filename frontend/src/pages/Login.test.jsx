@@ -9,22 +9,49 @@ jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
 }));
 
-test('submits form and navigates on success', async () => {
-  global.fetch = jest
-    .fn()
-    .mockResolvedValue({ ok: true, json: async () => ({}) });
+test('redirects to project dashboard when only one project is returned', async () => {
+  global.fetch = jest.fn().mockResolvedValue({
+    ok: true,
+    json: async () => ({
+      session: { project_roles: { p1: 'Viewer' } },
+    }),
+  });
   render(
     <MemoryRouter>
       <Login />
-    </MemoryRouter>
+    </MemoryRouter>,
   );
   await userEvent.type(screen.getByLabelText(/Email/i), 'a@b.com');
   await userEvent.type(screen.getByLabelText(/Password/i), 'secret');
-  await userEvent.type(screen.getByLabelText(/Project ID/i), 'p1');
   await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
   expect(fetch).toHaveBeenCalledWith(
     '/api/auth/login',
-    expect.objectContaining({ method: 'POST' })
+    expect.objectContaining({
+      method: 'POST',
+      body: JSON.stringify({ email: 'a@b.com', password: 'secret' }),
+    }),
   );
-  await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/projects'));
+  await waitFor(() =>
+    expect(mockNavigate).toHaveBeenCalledWith('/projects/p1'),
+  );
+});
+
+test('redirects to project list when multiple projects are returned', async () => {
+  global.fetch = jest.fn().mockResolvedValue({
+    ok: true,
+    json: async () => ({
+      session: { project_roles: { p1: 'Viewer', p2: 'Viewer' } },
+    }),
+  });
+  render(
+    <MemoryRouter>
+      <Login />
+    </MemoryRouter>,
+  );
+  await userEvent.type(screen.getByLabelText(/Email/i), 'a@b.com');
+  await userEvent.type(screen.getByLabelText(/Password/i), 'secret');
+  await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
+  await waitFor(() =>
+    expect(mockNavigate).toHaveBeenCalledWith('/projects'),
+  );
 });

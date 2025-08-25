@@ -15,7 +15,6 @@ if (!JWT_SECRET) {
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string(),
-  project_id: z.string(),
 });
 
 type LoginPayload = z.infer<typeof loginSchema>;
@@ -24,19 +23,25 @@ router.post(
   '/',
   validate(loginSchema),
   async (req: Request, res: Response, next: NextFunction) => {
-    const { email, password, project_id } = req.body as LoginPayload;
+    const { email, password } = req.body as LoginPayload;
     try {
-      const contact: any = await prisma.projectContact.findUnique({
-        where: { project_id_email: { project_id, email } },
+      const user: any = await (prisma as any).accountUser.findUnique({
+        where: { email },
       });
-      if (
-        !contact ||
-        !(await bcrypt.compare(password, contact.password_hash || ''))
-      ) {
+      if (!user || !(await bcrypt.compare(password, user.password_hash || ''))) {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
+      const contacts: Array<{ project_contact_id: string }> = await prisma
+        .projectContact.findMany({
+          where: { email, account_id: user.account_id },
+          select: { project_contact_id: true },
+        });
       const accesses = await prisma.projectAccess.findMany({
-        where: { project_contact_id: contact.project_contact_id },
+        where: {
+          project_contact_id: {
+            in: contacts.map((c) => c.project_contact_id),
+          },
+        },
         select: { project_id: true, role: true },
       });
       const project_roles: Record<string, string> = {};
@@ -45,9 +50,8 @@ router.post(
       });
       const token = jwt.sign(
         {
-          account_id: contact.account_id,
-          project_contact_id: contact.project_contact_id,
-          role: contact.role || '',
+          account_id: user.account_id,
+          user_id: user.user_id,
           project_roles,
         },
         JWT_SECRET,
@@ -61,9 +65,8 @@ router.post(
       });
       return res.json({
         session: {
-          account_id: contact.account_id,
-          project_contact_id: contact.project_contact_id,
-          role: contact.role || '',
+          account_id: user.account_id,
+          user_id: user.user_id,
           project_roles,
         },
       });
