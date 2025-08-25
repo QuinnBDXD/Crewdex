@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 const DB_NAME = 'offline-queue';
 const STORE_NAME = 'requests';
+const MAX_RETRIES = 5;
 
 function openDb() {
   return new Promise((resolve, reject) => {
@@ -68,6 +69,18 @@ export async function flushQueue() {
       } catch (err) {
         console.error('Re-queuing request after failure', err);
         item.retryCount = (item.retryCount || 0) + 1;
+
+        if (item.retryCount >= MAX_RETRIES) {
+          console.error('Max retries exceeded, dropping request', item);
+          await new Promise((resolve, reject) => {
+            const tx = db.transaction(STORE_NAME, 'readwrite');
+            tx.oncomplete = resolve;
+            tx.onerror = () => reject(tx.error);
+            tx.objectStore(STORE_NAME).delete(item.id);
+          });
+          continue;
+        }
+
         const delaySeconds = 2 ** item.retryCount;
         // Store next retry timestamp to implement exponential backoff
         item.nextRetryAt = Date.now() + delaySeconds * 1000;
