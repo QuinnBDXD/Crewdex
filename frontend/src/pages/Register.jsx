@@ -23,15 +23,20 @@ export default function Register() {
         credentials: 'include',
       });
       if (!res.ok) {
-        const message = await res.text();
-        setError(message || 'Registration failed');
+        let data;
+        try {
+          data = await res.json();
+        } catch {
+          // ignore JSON parsing errors
+        }
+        setError(data?.error?.message || 'Registration failed');
         return;
       }
       await res.json();
       setSuccess('Registration successful. Redirecting to login...');
       setTimeout(() => navigate('/'), 1500);
     } catch (err) {
-      setError(err.message || 'Registration failed');
+      setError(err?.message || 'Registration failed');
       console.error(err);
     }
   };
