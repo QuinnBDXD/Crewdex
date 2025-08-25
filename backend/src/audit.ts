@@ -1,5 +1,6 @@
 import { AuditEvent } from '@prisma/client'
 import { prisma } from './db'
+import { logger } from './logger'
 
 export async function logCreate(
   accountId: string,
@@ -20,7 +21,7 @@ export async function logCreate(
       at: new Date(),
     },
   })
-  console.log(`AUDIT create ${entity} ${entityId}`)
+  logger.info(`AUDIT create ${entity} ${entityId}`)
   return event
 }
 
@@ -44,7 +45,7 @@ export async function logUpdate(
       at: new Date(),
     },
   })
-  console.log(`AUDIT update ${entity} ${entityId}`)
+  logger.info(`AUDIT update ${entity} ${entityId}`)
   return event
 }
 

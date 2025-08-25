@@ -1,5 +1,6 @@
 import { NotificationEvent as DBNotificationEvent } from '@prisma/client'
 import { prisma } from '../db'
+import { logger } from '../logger'
 
 export interface NotificationEvent {
   type: string
@@ -12,24 +13,29 @@ export interface NotificationEvent {
 }
 
 export async function dispatch(event: NotificationEvent): Promise<void> {
-  await prisma.notificationEvent.create({
-    data: {
-      type: event.type,
-      project_id: event.project_id,
-      entity_type: null,
-      entity_id: null,
-      payload: { recipient: event.recipient, subject: event.subject, body: event.body },
-      created_at: event.timestamp,
-      delivered_to: [event.recipient],
-      account_id: event.account_id,
-    },
-  })
-  await sendEmail(event)
+  try {
+    await prisma.notificationEvent.create({
+      data: {
+        type: event.type,
+        project_id: event.project_id,
+        entity_type: null,
+        entity_id: null,
+        payload: { recipient: event.recipient, subject: event.subject, body: event.body },
+        created_at: event.timestamp,
+        delivered_to: [event.recipient],
+        account_id: event.account_id,
+      },
+    })
+    await sendEmail(event)
+  } catch (err) {
+    logger.error({ err }, 'Failed to dispatch notification')
+    throw err
+  }
 }
 
 async function sendEmail(event: NotificationEvent): Promise<void> {
   // Email send stub
-  console.log(`Email to ${event.recipient}: ${event.subject}`)
+  logger.info(`Email to ${event.recipient}: ${event.subject}`)
 }
 
 export function getDispatchedEvents(accountId: string): Promise<DBNotificationEvent[]> {
